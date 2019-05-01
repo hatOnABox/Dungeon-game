@@ -40,8 +40,7 @@ def fight():
 
     while True:
         clear()
-        print(monster.stats['hp'])
-        
+        print('You are at ' + str(player['hp']) + ' hit points!')
         if monster.stats['speed'] >= player['speed']:
             i = 0
             while i < monster.stats['actionsNum']:  
@@ -55,33 +54,37 @@ def fight():
                 i += 1
             dodging = False
 
+            if player['hp'] <= 0:
+                input('YOU DIED!!! (Press enter to continue) ')
+                return False
+
 
             action = input('What are you going to do? ')
             
             if action == 'atk':
+                input('You hit the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
                 monster.stats['hp'] -= player['actions']['atk']['punch']
             elif action == 'dodge':
                 dodging = True
             
             if monster.stats['hp'] <= 0:
                 monster.stats = monster.base
+                input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
                 return True
-            elif player['hp'] <= 0:
-                return False
         else:
             action = input('What are you going to do? ')
             
             if action == 'atk':
+                input('You hit the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
                 monster.stats['hp'] -= player['actions']['atk']['punch']
             elif action == 'dodge':
                 dodging = True
             
             if monster.stats['hp'] <= 0:
                 monster.stats = monster.base
+                input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
                 return True
-            elif player['hp'] <= 0:
-                return False
-            
+
             i = 0
             while i < monster.stats['actionsNum']:  
                 runAction = randint(0, actionsNum)
@@ -93,10 +96,11 @@ def fight():
                     input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
             dodging = False
+            
+            if player['hp'] <= 0:
+                input('YOU DIED!!! (Press enter to continue) ')
+                return False
         
-        
-    
-
 
 def loop():
     global map
@@ -110,7 +114,7 @@ def loop():
         
         if userInput.lower() == 'd':
             if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
-                input('You can\'t go that way! (Press any button to continue) ')
+                input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput + 1] == '#':
                     if fight() == False:
@@ -119,7 +123,7 @@ def loop():
                 map[beforeInput] = ' '
         elif userInput.lower() == 'a':
             if map[beforeInput-1] == '_' or map[beforeInput-1] == '|':
-                input('You can\'t go that way! (Press any button to continue) ')
+                input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput - 1] == '#':
                     if fight() == False:
@@ -129,7 +133,7 @@ def loop():
                 map[beforeInput] = ' '
         elif userInput.lower() == 'w':
             if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
-                input('You can\'t go that way! (Press any button to continue) ')
+                input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput-map.index('\n')-1] == '#':
                     if fight() == False:
@@ -139,13 +143,15 @@ def loop():
                 map[beforeInput] = ' '
         elif userInput.lower() == 's':
             if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
-                input('You can\'t go that way! (Press any button to continue) ')
+                input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput+map.index('\n')+1] == '#':
                     if fight() == False:
                         break
                 map[beforeInput+map.index('\n')+1] = '@'
                 map[beforeInput] = ' '
+        else:
+            input('That is not an option! (Press enter to continue) ')
         
         
         clear()
