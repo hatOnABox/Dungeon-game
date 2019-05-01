@@ -47,12 +47,16 @@ def fight():
                 runAction = randint(0, actionsNum)
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
-                    runAttack = randint(0, attackNum)
-                    currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                    player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                    input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                    if dodging == True:
+                        input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                        dodging = False
+                    else:
+                        runAttack = randint(0, attackNum)
+                        currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
-            dodging = False
+            
 
             if player['hp'] <= 0:
                 input('YOU DIED!!! (Press enter to continue) ')
@@ -90,12 +94,15 @@ def fight():
                 runAction = randint(0, actionsNum)
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
-                    runAttack = randint(0, attackNum)
-                    currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                    player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                    input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                    if dodging == True:
+                        input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                        dodging = False
+                    else:
+                        runAttack = randint(0, attackNum)
+                        currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
-            dodging = False
             
             if player['hp'] <= 0:
                 input('YOU DIED!!! (Press enter to continue) ')
