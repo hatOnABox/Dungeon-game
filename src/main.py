@@ -30,9 +30,10 @@ def loop():
     
     for i in map:
         print(i, end="")
+    print('\n' + str(map.index('@')))
     userInput = input('\nWhat are you going to do? ')
     beforeInput = map.index('@')
-    # 386
+    print(len(map))
     
     if userInput.lower() == 'd':
         if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
@@ -46,10 +47,21 @@ def loop():
         else:    
             map[beforeInput-1] = '@'
             map[beforeInput] = ' '
+    elif userInput.lower() == 'w':
+        if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
+            input('You can\'t go that way! (Press any button to continue) ')
+        else:    
+            map[beforeInput-map.index('\n')-1] = '@'
+            map[beforeInput] = ' '
+    elif userInput.lower() == 's':
+        if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
+            input('You can\'t go that way! (Press any button to continue) ')
+        else:    
+            map[beforeInput+map.index('\n')+1] = '@'
+            map[beforeInput] = ' '
+    
     
     clear()
-    
-    
 
 
 while True:
