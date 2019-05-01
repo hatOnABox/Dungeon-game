@@ -157,4 +157,5 @@ def loop():
         clear()
 
 
+clear()
 loop()
