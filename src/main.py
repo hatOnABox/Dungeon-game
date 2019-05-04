@@ -47,14 +47,16 @@ def fight():
                 runAction = randint(0, actionsNum)
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
-                    if dodging == True:
+                    if dodging == True and monster.stats['speed'] > player['speed']:
+                        input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                    else:    
                         input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
                         dodging = False
-                    else:
-                        runAttack = randint(0, attackNum)
-                        currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                else:
+                    runAttack = randint(0, attackNum)
+                    currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                    player['hp'] -= monster.stats['actions']['atk'][currentAttack]
+                    input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
             
 
@@ -95,7 +97,10 @@ def fight():
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
                     if dodging == True:
-                        input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                        if monster.stats['speed'] > player['speed']:
+                            input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                        else:    
+                            input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
                         dodging = False
                     else:
                         runAttack = randint(0, attackNum)
