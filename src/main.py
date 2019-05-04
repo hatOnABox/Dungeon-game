@@ -68,10 +68,21 @@ def fight():
             action = input('What are you going to do? ')
             
             if action == 'atk':
-                input('You hit the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
-                monster.stats['hp'] -= player['actions']['atk']['punch']
+                for i in list(player['actions']['atk']):
+                    print(i)
+                theAttack = input('Which attack? ')
+                try:
+                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                    input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
+                except:
+                    input('That\'s not an attack! (Press enter to continue) ')
             elif action == 'dodge':
-                dodging = True
+                if checkKey(player['actions'], 'dodge') == True:        
+                    dodging = True
+                else:
+                    input('You don\'t have the dodge action! (Press enter to continue) ')
+            else:
+                input('That\'s not an action! (Press enter to continue) ')
             
             if monster.stats['hp'] <= 0:
                 monster.stats = monster.base
@@ -81,10 +92,22 @@ def fight():
             action = input('What are you going to do? ')
             
             if action == 'atk':
-                input('You hit the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
-                monster.stats['hp'] -= player['actions']['atk']['punch']
+                for i in list(player['actions']['atk']):
+                    print(i)
+                theAttack = input('Which attack? ')
+                try:
+                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                    input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
+                except:
+                    input('That\'s not an attack! (Press enter to continue) ')
             elif action == 'dodge':
-                dodging = True
+                if checkKey(player['actions'], 'dodge') == True:        
+                    dodging = True
+                else:
+                    input('You don\'t have the dodge action! (Press enter to continue) ')
+            else:
+                input('That\'s not an action! (Press enter to continue) ')
+                
             
             if monster.stats['hp'] <= 0:
                 monster.stats = monster.base
