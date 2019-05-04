@@ -7,7 +7,7 @@ import items
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'hp': 10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1}
+player = {'hp': 10, 'maxHp':10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1, 'gold':0}
 inventory = [items.healingPotion_1]
 floor = 1
 
@@ -235,12 +235,36 @@ def loop():
         elif userInput.lower() == 'exit':
             break
         elif userInput.lower() == 'items':
-            x = 0
-            for i in inventory:
-                x += 1
-                print(str(x) + '. ' + i['name'])
-                itemName = input('Type in an item\' items name to use it (Press enter to continue) ')
-                
+            if inventory == []:
+                input('You don\'t have any items! (Press enter to continue) ')
+            else:
+                gotItem = False
+                usedItem = False
+                for i in inventory:
+                    print(i['name'])
+                itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
+                if itemName.lower() != 'cancel':
+                    for i in inventory:
+                        if i['name'] == itemName.lower():
+                            gotItem = True
+                            if i['consumable'] == True:
+                                if i['type'] == 'healing':
+                                    if player['hp'] == player['maxHp']:
+                                        input('You are already at your max hp! (Press enter to continue) ')
+                                    else:
+                                        player['hp'] += i['value']
+                                        usedItem = True
+                                
+                                if usedItem == True:
+                                    inventory.remove(i)
+                                    input('You used a ' + i['name'] + '! (Press enter to continue) ')
+                                
+                            else:
+                                input('The item you wanted to use it not a consumable! (Press enter to continue) ')
+                            break
+                    
+                    if gotItem == False:
+                        input('You don\'t have that item! (Press enter to continue) ' )
         else:
             input('That is not an option! (Press enter to continue) ')
         

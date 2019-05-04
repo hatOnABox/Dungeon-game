@@ -1,1 +1,1 @@
-healingPotion_1 = {'name':'minor healing potion', 'type':'healing', 'value': 20, 'consumable':True}
+healingPotion_1 = {'name':'minor healing potion', 'type':'healing', 'value': 20, 'price': 50, 'consumable':True}
