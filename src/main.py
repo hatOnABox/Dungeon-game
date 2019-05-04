@@ -35,7 +35,6 @@ def fight():
     dodging = False
     monster = monsters.bat
     monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp))
-    print(monster.stats['hp'])
     actionsNum = len(list(monster.stats['actions'])) - 1
     attackNum = len(list(monster.stats['actions']['atk'])) - 1
     
