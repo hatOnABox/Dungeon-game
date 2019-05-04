@@ -34,7 +34,8 @@ def fight():
     
     dodging = False
     monster = monsters.bat
-    monster.stats['hp'] = randint(monster.stats['hp'], 2 * (floor + monster.stats['hp']))
+    monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp))
+    print(monster.stats['hp'])
     actionsNum = len(list(monster.stats['actions'])) - 1
     attackNum = len(list(monster.stats['actions']['atk'])) - 1
     
@@ -87,7 +88,6 @@ def fight():
                 input('That\'s not an action! (Press enter to continue) ')
             
             if monster.stats['hp'] <= 0:
-                monster.stats = monster.base
                 input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
                 return True
         else:
@@ -112,7 +112,6 @@ def fight():
                 
             
             if monster.stats['hp'] <= 0:
-                monster.stats = monster.base
                 input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
                 return True
 
