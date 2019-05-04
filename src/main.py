@@ -1,12 +1,14 @@
 from random import randint
 from os import system, name
 import monsters
+import items
 
 
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
 player = {'hp': 10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1}
+inventory = [items.healingPotion_1]
 floor = 1
 
 # Key:
@@ -16,6 +18,7 @@ floor = 1
 # @ : player
 # ! : NPC
 # # : enemy
+# $ : boss
 # empty space : nothing
 # % : stairs (leads the player up or down a level)
 # * : door
@@ -27,6 +30,10 @@ def clear():
         system('cls') 
     else: 
         system('clear') 
+
+
+def interact():
+    pass
 
 
 def fight():
@@ -73,7 +80,7 @@ def fight():
                         runAttack = randint(0, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                         player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
             
 
@@ -158,7 +165,7 @@ def fight():
                         runAttack = randint(0, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                         player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
             
             if player['hp'] <= 0:
@@ -170,18 +177,28 @@ def loop():
     global map
     
     while True:
-        for i in map:
-            print(i, end="")
+        beforeInput = map.index('@')
+
+        y = 0
+        while y < len(map):
+            if y == beforeInput + 1 or y == beforeInput - 1 or y == beforeInput-map.index('\n')-1 or y == beforeInput+map.index('\n')+1 or y == beforeInput+map.index('\n') or y == beforeInput+map.index('\n')+2 or y == beforeInput-map.index('\n') or y == beforeInput-map.index('\n')-2:
+                print(map[y], end='')
+            elif map[y] == '\n':
+                print('\n', end='')
+            elif map[y] == '@':
+                print('@', end='')
+            else:
+                print('.', end='')
+            y+=1
         print('\nHP: ' + str(player['hp']))
         userInput = input('What are you going to do? ')
-        beforeInput = map.index('@')
 
         
         if userInput.lower() == 'd':
             if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput + 1] == '#':
+                if map[beforeInput+1] == '#' or map[beforeInput+1] == '$':
                     if fight() == False:
                         break
                 map[beforeInput + 1] = '@'
@@ -190,7 +207,7 @@ def loop():
             if map[beforeInput-1] == '_' or map[beforeInput-1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput - 1] == '#':
+                if map[beforeInput-1] == '#' or map[beforeInput-1] == '$':
                     if fight() == False:
                         break
                 
@@ -200,7 +217,7 @@ def loop():
             if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput-map.index('\n')-1] == '#':
+                if map[beforeInput+map.index('\n')+1] == '#' or map[beforeInput+map.index('\n')+1] == '$':
                     if fight() == False:
                         break
                 
@@ -210,13 +227,20 @@ def loop():
             if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput+map.index('\n')+1] == '#':
+                if map[beforeInput+map.index('\n')+1] == '#' or map[beforeInput+map.index('\n')+1] == '$':
                     if fight() == False:
                         break
                 map[beforeInput+map.index('\n')+1] = '@'
                 map[beforeInput] = ' '
         elif userInput.lower() == 'exit':
             break
+        elif userInput.lower() == 'items':
+            x = 0
+            for i in inventory:
+                x += 1
+                print(str(x) + '. ' + i['name'])
+                itemName = input('Type in an item\' items name to use it (Press enter to continue) ')
+                
         else:
             input('That is not an option! (Press enter to continue) ')
         
