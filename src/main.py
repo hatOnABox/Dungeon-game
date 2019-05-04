@@ -7,6 +7,7 @@ openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
 player = {'hp': 10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1}
+floor = 1
 
 # Key:
 # _ : wall
@@ -33,6 +34,7 @@ def fight():
     
     dodging = False
     monster = monsters.bat
+    monster.stats['hp'] = randint(monster.stats['hp'], 2 * (floor + monster.stats['hp']))
     actionsNum = len(list(monster.stats['actions'])) - 1
     attackNum = len(list(monster.stats['actions']['atk'])) - 1
     
@@ -77,7 +79,7 @@ def fight():
                 except:
                     input('That\'s not an attack! (Press enter to continue) ')
             elif action == 'dodge':
-                if checkKey(player['actions'], 'dodge') == True:        
+                if checkKey(player['actions'], 'dodge') == True:
                     dodging = True
                 else:
                     input('You don\'t have the dodge action! (Press enter to continue) ')
@@ -143,7 +145,8 @@ def loop():
     while True:
         for i in map:
             print(i, end="")
-        userInput = input('\nWhat are you going to do? ')
+        print('\nHP: ' + str(player['hp']))
+        userInput = input('What are you going to do? ')
         beforeInput = map.index('@')
 
         
@@ -185,6 +188,8 @@ def loop():
                         break
                 map[beforeInput+map.index('\n')+1] = '@'
                 map[beforeInput] = ' '
+        elif userInput.lower() == 'exit':
+            break
         else:
             input('That is not an option! (Press enter to continue) ')
         
