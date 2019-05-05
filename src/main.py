@@ -8,8 +8,10 @@ openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
 player = {'hp': 10, 'maxHp':10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1, 'gold':0}
-inventory = [items.healingPotion_1]
+inventory = [items.healingPotion_1, items.torch]
 floor = 1
+light = 50
+
 
 # Key:
 # _ : wall
@@ -36,6 +38,53 @@ def interact():
     pass
 
 
+def lookInInventory():
+    global light
+    
+    if inventory == []:
+        input('You don\'t have any items! (Press enter to continue) ')
+    else:
+        gotItem = False
+        usedItem = False
+        for i in inventory:
+            print(i['name'])
+        itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
+        if itemName.lower() != 'cancel':
+            for i in inventory:
+                if i['name'] == itemName.lower():
+                    gotItem = True
+                    if i['consumable'] == True:
+                        if i['type'] == 'healing':
+                            if player['hp'] == player['maxHp']:
+                                input('You are already at your max hp! (Press enter to continue) ')
+                            else:
+                                player['hp'] += i['value']
+                                if player['hp'] > player['maxHp']:
+                                    player['hp'] = player['maxHp']
+                                usedItem = True
+                        elif i['type'] == 'light':
+                            if light == 200:
+                                input('You already have enought light! (Press enter to continue) ')
+                            else:
+                                light += i['value']
+                                if light > 200:
+                                    light = 200
+                                usedItem = True
+                        
+                        if usedItem == True:
+                            inventory.remove(i)
+                            input('You used a ' + i['name'] + '! (Press enter to continue) ')
+                        
+                    else:
+                        input('The item you wanted to use it not a consumable! (Press enter to continue) ')
+                    break
+            
+            if gotItem == False:
+                input('You don\'t have that item! (Press enter to continue) ' )
+
+
+
+
 def fight():
     global player
     
@@ -46,12 +95,15 @@ def fight():
     attackNum = len(list(monster.stats['actions']['atk'])) - 1
     dodgedLastTurn = False
     
-    input('A ' + monster.stats['name'] + ' attacks you! (press enter to continue) ')
+    if light != 0:
+        input('A ' + monster.stats['name'] + ' attacks you! (press enter to continue) ')
+    else:
+        input('Something attacks you! (Press enter to continue) ')
 
     while True:
         clear()
         print('You are at ' + str(player['hp']) + ' hit points!')
-        if monster.stats['speed'] >= player['speed']:
+        if monster.stats['speed'] >= player['speed'] or light == 0:
             i = 0
             while i < monster.stats['actionsNum']:  
                 runAction = randint(0, actionsNum)
@@ -59,28 +111,43 @@ def fight():
                 if currentAction == 'atk':
                     if dodging == True:
                         if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False:
-                            input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                            if light != 0:
+                                input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                            else:
+                                input('You\'re to slow to dodge the monster\'s attack! (Press enter to continue) ')
                             dodgedLastTurn = True
                             runAttack = randint(0, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                             player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                            if light != 0:
+                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                            else:
+                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                         elif dodgedLastTurn == True:
                             input('You already dodged last turn! (Press enter to contimue) ')
                             dodgedLastTurn = False
                             runAttack = randint(0, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                             player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
-                        else:   
-                            input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                            if light != 0:    
+                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                            else:
+                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                        else:
+                            if light != 0:
+                                input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
+                            else:
+                                input('You dodge the monster\'s attack! (Press enter to continue) ')
                             dodgedLastTurn = True
                         dodging = False
                     else:
                         runAttack = randint(0, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                         player['hp'] -= monster.stats['actions']['atk'][currentAttack]
-                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                        if light != 0:
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
+                        else:
+                            input('The monster make a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]) + ' damage! (Press enter to continue) ')
                 i += 1
             
 
@@ -97,7 +164,13 @@ def fight():
                 theAttack = input('Which attack? ')
                 try:
                     monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                    input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
+                    if light != 0:
+                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
+                    else:
+                        if randint(0, 1) == 1:
+                            input('You attack the monster for ' + str(player['actions']['atk']['punch']) + ' damage! (Press enter to continue) ')
+                        else:
+                            input('You attack helplessly in the dark! (Press enter to continue) ')
                 except:
                     input('That\'s not an attack! (Press enter to continue) ')
             elif action == 'dodge':
@@ -107,38 +180,7 @@ def fight():
                     input('You don\'t have the dodge action! (Press enter to continue) ')
                     dodgedLastTurn = False
             elif action == 'items':
-                if inventory == []:
-                    input('You don\'t have any items! (Press enter to continue) ')
-                else:
-                    gotItem = False
-                    usedItem = False
-                    for i in inventory:
-                        print(i['name'])
-                    itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
-                    if itemName.lower() != 'cancel':
-                        for i in inventory:
-                            if i['name'] == itemName.lower():
-                                gotItem = True
-                                if i['consumable'] == True:
-                                    if i['type'] == 'healing':
-                                        if player['hp'] == player['maxHp']:
-                                            input('You are already at your max hp! (Press enter to continue) ')
-                                        else:
-                                            player['hp'] += i['value']
-                                            if player['hp'] > player['maxHp']:
-                                                player['hp'] = i['value'] - player['maxHp']
-                                            usedItem = True
-                                    
-                                    if usedItem == True:
-                                        inventory.remove(i)
-                                        input('You used a ' + i['name'] + '! (Press enter to continue) ')
-                                    
-                                else:
-                                    input('The item you wanted to use it not a consumable! (Press enter to continue) ')
-                                break
-                        
-                        if gotItem == False:
-                            input('You don\'t have that item! (Press enter to continue) ' )
+                lookInInventory()
             else:
                 input('That is not an option! (Press enter to continue) ')
             
@@ -163,38 +205,7 @@ def fight():
                 else:
                     input('You don\'t have the dodge action! (Press enter to continue) ')
             elif action == 'items':
-                if inventory == []:
-                    input('You don\'t have any items! (Press enter to continue) ')
-                else:
-                    gotItem = False
-                    usedItem = False
-                    for i in inventory:
-                        print(i['name'])
-                    itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
-                    if itemName.lower() != 'cancel':
-                        for i in inventory:
-                            if i['name'] == itemName.lower():
-                                gotItem = True
-                                if i['consumable'] == True:
-                                    if i['type'] == 'healing':
-                                        if player['hp'] == player['maxHp']:
-                                            input('You are already at your max hp! (Press enter to continue) ')
-                                        else:
-                                            player['hp'] += i['value']
-                                            if player['hp'] > player['maxHp']:
-                                                player['hp'] = i['value'] - player['maxHp']
-                                            usedItem = True
-                                    
-                                    if usedItem == True:
-                                        inventory.remove(i)
-                                        input('You used a ' + i['name'] + '! (Press enter to continue) ')
-                                    
-                                else:
-                                    input('The item you wanted to use it not a consumable! (Press enter to continue) ')
-                                break
-                        
-                        if gotItem == False:
-                            input('You don\'t have that item! (Press enter to continue) ' )
+                lookInInventory()
             else:
                 input('That is not an option! (Press enter to continue) ')
             
@@ -240,22 +251,36 @@ def fight():
 
 def loop():
     global map
+    global light
     
     while True:
         beforeInput = map.index('@')
-
-        y = 0
-        while y < len(map):
-            if y == beforeInput + 1 or y == beforeInput - 1 or y == beforeInput-map.index('\n')-1 or y == beforeInput+map.index('\n')+1 or y == beforeInput+map.index('\n') or y == beforeInput+map.index('\n')+2 or y == beforeInput-map.index('\n') or y == beforeInput-map.index('\n')-2:
-                print(map[y], end='')
-            elif map[y] == '\n':
-                print('\n', end='')
-            elif map[y] == '@':
-                print('@', end='')
-            else:
-                print('.', end='')
-            y+=1
+        
+        if light != 0:
+            y = 0
+            while y < len(map):
+                if y == beforeInput + 1 or y == beforeInput - 1 or y == beforeInput-map.index('\n')-1 or y == beforeInput+map.index('\n')+1 or y == beforeInput+map.index('\n') or y == beforeInput+map.index('\n')+2 or y == beforeInput-map.index('\n') or y == beforeInput-map.index('\n')-2:
+                    print(map[y], end='')
+                elif map[y] == '\n':
+                    print('\n', end='')
+                elif map[y] == '@':
+                    print('@', end='')
+                else:
+                    print('.', end='')
+                y+=1
+        else:
+            y = 0
+            while y < len(map):
+                if map[y] == '\n':
+                    print('\n', end='')
+                elif map[y] != '@':
+                    print('.', end='')
+                else:
+                    print('@', end='')
+                y+=1
+        
         print('\nHP: ' + str(player['hp']))
+        print('Light level: ' + str(light))
         userInput = input('What are you going to do? ')
 
         
@@ -300,40 +325,13 @@ def loop():
         elif userInput.lower() == 'exit':
             break
         elif userInput.lower() == 'items':
-            if inventory == []:
-                input('You don\'t have any items! (Press enter to continue) ')
-            else:
-                gotItem = False
-                usedItem = False
-                for i in inventory:
-                    print(i['name'])
-                itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
-                if itemName.lower() != 'cancel':
-                    for i in inventory:
-                        if i['name'] == itemName.lower():
-                            gotItem = True
-                            if i['consumable'] == True:
-                                if i['type'] == 'healing':
-                                    if player['hp'] == player['maxHp']:
-                                        input('You are already at your max hp! (Press enter to continue) ')
-                                    else:
-                                        player['hp'] += i['value']
-                                        if player['hp'] > player['maxHp']:
-                                            player['hp'] = i['value'] - player['maxHp']
-                                        usedItem = True
-                                
-                                if usedItem == True:
-                                    inventory.remove(i)
-                                    input('You used a ' + i['name'] + '! (Press enter to continue) ')
-                                
-                            else:
-                                input('The item you wanted to use it not a consumable! (Press enter to continue) ')
-                            break
-                    
-                    if gotItem == False:
-                        input('You don\'t have that item! (Press enter to continue) ' )
+            lookInInventory()
         else:
             input('That is not an option! (Press enter to continue) ')
+        
+        if light != 0:
+            if userInput.lower() != 'items':
+                light -= 1
         
         
         clear()
