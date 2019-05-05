@@ -106,6 +106,37 @@ def fight():
                 else:
                     input('You don\'t have the dodge action! (Press enter to continue) ')
                     dodgedLastTurn = False
+            elif action == 'items':
+                if inventory == []:
+                    input('You don\'t have any items! (Press enter to continue) ')
+                else:
+                    gotItem = False
+                    usedItem = False
+                    for i in inventory:
+                        print(i['name'])
+                    itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
+                    if itemName.lower() != 'cancel':
+                        for i in inventory:
+                            if i['name'] == itemName.lower():
+                                gotItem = True
+                                if i['consumable'] == True:
+                                    if i['type'] == 'healing':
+                                        if player['hp'] == player['maxHp']:
+                                            input('You are already at your max hp! (Press enter to continue) ')
+                                        else:
+                                            player['hp'] += i['value']
+                                            usedItem = True
+                                    
+                                    if usedItem == True:
+                                        inventory.remove(i)
+                                        input('You used a ' + i['name'] + '! (Press enter to continue) ')
+                                    
+                                else:
+                                    input('The item you wanted to use it not a consumable! (Press enter to continue) ')
+                                break
+                        
+                        if gotItem == False:
+                            input('You don\'t have that item! (Press enter to continue) ' )
             else:
                 input('That\'s not an action! (Press enter to continue) ')
             
@@ -129,6 +160,37 @@ def fight():
                     dodging = True
                 else:
                     input('You don\'t have the dodge action! (Press enter to continue) ')
+            elif action == 'items':
+                if inventory == []:
+                    input('You don\'t have any items! (Press enter to continue) ')
+                else:
+                    gotItem = False
+                    usedItem = False
+                    for i in inventory:
+                        print(i['name'])
+                    itemName = input('Type in an item\'s items name to use it or type in "cancel" (Press enter to continue) ')
+                    if itemName.lower() != 'cancel':
+                        for i in inventory:
+                            if i['name'] == itemName.lower():
+                                gotItem = True
+                                if i['consumable'] == True:
+                                    if i['type'] == 'healing':
+                                        if player['hp'] == player['maxHp']:
+                                            input('You are already at your max hp! (Press enter to continue) ')
+                                        else:
+                                            player['hp'] += i['value']
+                                            usedItem = True
+                                    
+                                    if usedItem == True:
+                                        inventory.remove(i)
+                                        input('You used a ' + i['name'] + '! (Press enter to continue) ')
+                                    
+                                else:
+                                    input('The item you wanted to use it not a consumable! (Press enter to continue) ')
+                                break
+                        
+                        if gotItem == False:
+                            input('You don\'t have that item! (Press enter to continue) ' )
             else:
                 input('That\'s not an action! (Press enter to continue) ')
                 
