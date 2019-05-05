@@ -125,6 +125,8 @@ def fight():
                                             input('You are already at your max hp! (Press enter to continue) ')
                                         else:
                                             player['hp'] += i['value']
+                                            if player['hp'] > player['maxHp']:
+                                                player['hp'] = i['value'] - player['maxHp']
                                             usedItem = True
                                     
                                     if usedItem == True:
@@ -138,7 +140,7 @@ def fight():
                         if gotItem == False:
                             input('You don\'t have that item! (Press enter to continue) ' )
             else:
-                input('That\'s not an action! (Press enter to continue) ')
+                input('That is not an option! (Press enter to continue) ')
             
             if monster.stats['hp'] <= 0:
                 input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
@@ -179,6 +181,8 @@ def fight():
                                             input('You are already at your max hp! (Press enter to continue) ')
                                         else:
                                             player['hp'] += i['value']
+                                            if player['hp'] > player['maxHp']:
+                                                player['hp'] = i['value'] - player['maxHp']
                                             usedItem = True
                                     
                                     if usedItem == True:
@@ -192,8 +196,7 @@ def fight():
                         if gotItem == False:
                             input('You don\'t have that item! (Press enter to continue) ' )
             else:
-                input('That\'s not an action! (Press enter to continue) ')
-                
+                input('That is not an option! (Press enter to continue) ')
             
             if monster.stats['hp'] <= 0:
                 input('You have defeated the ' + monster.stats['name'] + '! (Press enter to continue) ')
@@ -279,7 +282,7 @@ def loop():
             if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput+map.index('\n')+1] == '#' or map[beforeInput+map.index('\n')+1] == '$':
+                if map[beforeInput-map.index('\n')-1] == '#' or map[beforeInput-map.index('\n')-1] == '$':
                     if fight() == False:
                         break
                 
@@ -315,6 +318,8 @@ def loop():
                                         input('You are already at your max hp! (Press enter to continue) ')
                                     else:
                                         player['hp'] += i['value']
+                                        if player['hp'] > player['maxHp']:
+                                            player['hp'] = i['value'] - player['maxHp']
                                         usedItem = True
                                 
                                 if usedItem == True:
