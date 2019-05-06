@@ -2,6 +2,7 @@ from random import randint, choice
 from os import system, name
 import monsters
 import items
+import traps
 
 
 openMap = open('map.txt', 'r')
@@ -35,7 +36,21 @@ def clear():
 
 
 def interact():
-    pass
+    eventGen = randint(1, 6)
+    if eventGen == 1:
+        fight()
+    elif eventGen == 2 or eventGen == 3:
+        trap = choice(traps.listOftraps[str(floor)])
+        player['hp'] -= trap['dmg']
+        input('Out of nowhere ' + trap['name'] + ' attacks you! You take ' + str(trap['dmg']) + ' damage! (Press enter to continue) ')
+        if player['hp'] <= 0:
+            input('YOU DIED!!! (Press enter to continue) ')
+    elif eventGen == 4 or eventGen == 5:
+        goldGained = randint(floor, floor*2)
+        player['gold'] += goldGained
+        input('You find a pot and you gain ' + str(goldGained) + ' gold! (Press enter to continue) ')
+    elif eventGen == 6:
+        input('')
 
 
 def lookInInventory():
@@ -288,6 +303,8 @@ def loop():
                     print('\n', end='')
                 elif map[y] == '@':
                     print('@', end='')
+                elif map[y] == '=':
+                    print(' ', end='')
                 else:
                     print('.', end='')
                 y+=1
@@ -317,6 +334,9 @@ def loop():
                 elif map[beforeInput-1] == '$':
                     if fight(boss=True)==False:
                         break
+                elif map[beforeInput+1] == '-':
+                    interact()
+                    
                 map[beforeInput + 1] = '@'
                 map[beforeInput] = ' '
         elif userInput.lower() == 'a':
@@ -329,20 +349,23 @@ def loop():
                 elif map[beforeInput-1] == '$':
                     if fight(boss=True)==False:
                         break
-                
+                elif map[beforeInput-1] == '-':
+                    interact()
+                    
                 map[beforeInput-1] = '@'
                 map[beforeInput] = ' '
         elif userInput.lower() == 'w':
             if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput-map.index('\n')-1] == '#' or map[beforeInput-map.index('\n')-1] == '$':
-                    if map[beforeInput-map.index('\n')-1] == '#':
-                        if fight() == False:
-                            break
-                    elif map[beforeInput-map.index('\n')-1] == '$':
-                        if fight(boss=True)==False:
-                            break
+                if map[beforeInput-map.index('\n')-1] == '#':
+                    if fight() == False:
+                        break
+                elif map[beforeInput-map.index('\n')-1] == '$':
+                    if fight(boss=True)==False:
+                        break
+                elif map[beforeInput-map.index('\n')-1] == '-':
+                    interact()
                 
                 map[beforeInput-map.index('\n')-1] = '@'
                 map[beforeInput] = ' '
@@ -350,13 +373,15 @@ def loop():
             if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput+map.index('\n')+1] == '#' or map[beforeInput+map.index('\n')+1] == '$':
-                    if map[beforeInput+map.index('\n')+1] == '#':
-                        if fight() == False:
-                            break
-                    elif map[beforeInput+map.index('\n')+1] == '$':
-                        if fight(boss=True)==False:
-                            break
+                if map[beforeInput+map.index('\n')+1] == '#':
+                    if fight() == False:
+                        break
+                elif map[beforeInput+map.index('\n')+1] == '$':
+                    if fight(boss=True)==False:
+                        break
+                elif map[beforeInput+map.index('\n')+1] == '-':
+                    interact()
+                
                 map[beforeInput+map.index('\n')+1] = '@'
                 map[beforeInput] = ' '
         elif userInput.lower() == 'exit':
@@ -371,6 +396,8 @@ def loop():
                 light -= 1
         
         
+        if player['hp'] <= 0:
+            break
         clear()
 
 
