@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 from os import system, name
 import monsters
 import items
@@ -7,7 +7,7 @@ import items
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'hp': 10, 'maxHp':10, 'speed':5, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True, 'run':5}, 'level':1, 'gold':0}
+player = {'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True}, 'level':1, 'gold':0}
 inventory = [items.healingPotion_1, items.torch]
 floor = 1
 light = 50
@@ -85,11 +85,18 @@ def lookInInventory():
 
 
 
-def fight():
+def fight(boss=False):
     global player
     
+    boss = False
+    
     dodging = False
-    monster = monsters.bat
+    if boss == True:
+        boss = True
+        monster=choice(monsters.listOfBosses[str(floor)])
+    else:
+        monster = choice(monsters.listOfMonsters[str(floor)])
+    
     monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp))
     actionsNum = len(list(monster.stats['actions'])) - 1
     attackNum = len(list(monster.stats['actions']['atk'])) - 1
@@ -181,6 +188,14 @@ def fight():
                     dodgedLastTurn = False
             elif action == 'items':
                 lookInInventory()
+            elif action == 'run':
+                if player['speed'] > monster.stats['speed']:
+                    input('You run away! (Press enter to continue) ')
+                    break
+                elif boss == True:
+                    input('You can\'t run away from a boss! (Press enter to continue) ')
+                else:
+                    input('You\'re to slow to run away! (Press enter to continue) ')
             else:
                 input('That is not an option! (Press enter to continue) ')
             
@@ -204,6 +219,14 @@ def fight():
                     dodging = True
                 else:
                     input('You don\'t have the dodge action! (Press enter to continue) ')
+            elif action == 'run':
+                if player['speed'] > monster.stats['speed']:
+                    input('You run away! (Press enter to continue) ')
+                    break
+                elif boss == True:
+                    input('You can\'t run away from a boss! (Press enter to continue) ')
+                else:
+                    input('You\'re to slow to run away! (Press enter to continue) ')
             elif action == 'items':
                 lookInInventory()
             else:
@@ -288,8 +311,11 @@ def loop():
             if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput+1] == '#' or map[beforeInput+1] == '$':
+                if map[beforeInput+1] == '#':
                     if fight() == False:
+                        break
+                elif map[beforeInput-1] == '$':
+                    if fight(boss=True)==False:
                         break
                 map[beforeInput + 1] = '@'
                 map[beforeInput] = ' '
@@ -297,8 +323,11 @@ def loop():
             if map[beforeInput-1] == '_' or map[beforeInput-1] == '|':
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
-                if map[beforeInput-1] == '#' or map[beforeInput-1] == '$':
+                if map[beforeInput-1] == '#':
                     if fight() == False:
+                        break
+                elif map[beforeInput-1] == '$':
+                    if fight(boss=True)==False:
                         break
                 
                 map[beforeInput-1] = '@'
@@ -308,8 +337,12 @@ def loop():
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput-map.index('\n')-1] == '#' or map[beforeInput-map.index('\n')-1] == '$':
-                    if fight() == False:
-                        break
+                    if map[beforeInput-map.index('\n')-1] == '#':
+                        if fight() == False:
+                            break
+                    elif map[beforeInput-map.index('\n')-1] == '$':
+                        if fight(boss=True)==False:
+                            break
                 
                 map[beforeInput-map.index('\n')-1] = '@'
                 map[beforeInput] = ' '
@@ -318,8 +351,12 @@ def loop():
                 input('You can\'t go that way! (Press enter to continue) ')
             else:
                 if map[beforeInput+map.index('\n')+1] == '#' or map[beforeInput+map.index('\n')+1] == '$':
-                    if fight() == False:
-                        break
+                    if map[beforeInput+map.index('\n')+1] == '#':
+                        if fight() == False:
+                            break
+                    elif map[beforeInput+map.index('\n')+1] == '$':
+                        if fight(boss=True)==False:
+                            break
                 map[beforeInput+map.index('\n')+1] = '@'
                 map[beforeInput] = ' '
         elif userInput.lower() == 'exit':
