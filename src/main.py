@@ -8,10 +8,11 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch': 5}, 'dodge':True}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{'value':1}}
+player = {'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 floor = 1
 light = 50
+
 
 
 # Key:
@@ -101,6 +102,15 @@ def lookInInventory():
                         else:
                             player['currentArmor'] = i
                             input ('You equipped ' + i['name'] + '! (Press enter to continue) ')
+                    elif i['type'] == 'weapon':
+                        if i == player['currentWeapon']:
+                            input('You have disarmed yourself (Press enter to continue) ')
+                            player['actions']['atk'].pop(i['name'])
+                            player['currentWeapon'] = {}
+                        else:
+                            player['currentWeapon'] = i
+                            input('You have armed yourself with a ' + i['name'] + ' (Press enter to continue) ')
+                            player['actions']['atk'].update({i['name']: i['value']})
                     else:
                         input('The item you wanted to use it not a consumable! (Press enter to continue) ')
                     break
@@ -151,21 +161,21 @@ def fight(boss=False):
                             dodgedLastTurn = True
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
+                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
                             if light != 0:
-                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['value']) + ' damage! (Press enter to continue) ')
+                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['value']) + ' damage! (Press enter to continue) ')
                             else:
-                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                         elif dodgedLastTurn == True:
                             input('You already dodged last turn! (Press enter to contimue) ')
                             dodgedLastTurn = False
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
+                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
                             if light != 0:    
-                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                             else:
-                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                         else:
                             if light != 0:
                                 input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
@@ -176,11 +186,11 @@ def fight(boss=False):
                     else:
                         runAttack = randint(1, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                        player['hp'] -=  monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
+                        player['hp'] -=  monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
                         if light != 0:
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                         else:
-                            input('The monster make a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                            input('The monster make a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                 i += 1
             
 
@@ -192,6 +202,7 @@ def fight(boss=False):
             action = input('What are you going to do? ')
             
             if action == 'atk':
+                
                 for i in list(player['actions']['atk']):
                     print(i)
                 theAttack = input('Which attack? ')
@@ -279,15 +290,15 @@ def fight(boss=False):
                             dodgedLastTurn = True
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                            monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                            monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                         elif dodgedLastTurn == True:
                             input('You already dodged last turn! (Press enter to contimue) ')
                             dodgedLastTurn = False
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                         else:   
                             input('You dodge the ' + monster.stats['name'] + '\'s attack! (Press enter to continue) ')
                             dodgedLastTurn = True
@@ -295,8 +306,8 @@ def fight(boss=False):
                     else:
                         runAttack = randint(1, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']
-                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]/player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
+                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage! (Press enter to continue) ')
                 i += 1
             
             if player['hp'] <= 0:
@@ -402,9 +413,7 @@ def loop():
         elif userInput.lower() == 'exit':
             break
         elif userInput.lower() == 'items':
-            lookInInventory()
-        # elif userInput.lower() == 'equip':
-        #     for 
+            lookInInventory() 
         else:
             input('That is not an option! (Press enter to continue) ')
 
@@ -419,6 +428,7 @@ def loop():
         clear()
 
 
-clear()
-loop()
-clear()
+if __name__ == '__main__':
+    clear()
+    loop()
+    clear()
