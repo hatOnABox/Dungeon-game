@@ -279,9 +279,14 @@ def fight(boss=False):
                 except:
                     input('That\'s not an attack!  ' + used )
             elif action.lower() == 'magic':
-                for i in list(player['actions']['atk']):
-                    print(i)
-                theSpell = input('Which spell? ')
+                if player['class'] == 'mage':
+                    for i in list(player['actions']['atk']):
+                        print(i)
+                    
+                    theSpell = input('Which spell? ')
+                else:
+                    input('You do not know any magic! ' + used)
+                
             elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:
                     dodging = True
