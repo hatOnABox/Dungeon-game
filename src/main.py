@@ -8,7 +8,7 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue)'
 floor = 1
@@ -33,8 +33,21 @@ def clear():
     if name == 'nt': 
         system('cls') 
     else: 
-        system('clear') 
+        system('clear')
 
+
+def choseClass():
+    global player
+    
+    while True:
+        print('Mage\nFighter\nRouge\nRanger\n')
+        userInput = input('Chose your class... ')
+        if userInput.lower() != 'mage' or userInput.lower() != 'fighter' or userInput.lower() != 'rouge' or userInput.lower() != 'ranger':
+            player['class'] = userInput.lower()
+            break
+        else:
+            clear()
+        
 
 def shop():
     global inventory
@@ -249,7 +262,7 @@ def fight(boss=False):
 
             action = input('What are you going to do? ')
             
-            if action == 'atk':
+            if action.lower() == 'atk':
                 
                 for i in list(player['actions']['atk']):
                     print(i)
@@ -265,15 +278,19 @@ def fight(boss=False):
                             input('You attack helplessly in the dark!  ' + used )
                 except:
                     input('That\'s not an attack!  ' + used )
-            elif action == 'dodge':
+            elif action.lower() == 'magic':
+                for i in list(player['actions']['atk']):
+                    print(i)
+                theSpell = input('Which spell? ')
+            elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:
                     dodging = True
                 else:
                     input('You don\'t have the dodge action!  ' + used )
                     dodgedLastTurn = False
-            elif action == 'items':
+            elif action.lower() == 'items':
                 lookInInventory()
-            elif action == 'run':
+            elif action.lower() == 'run':
                 if player['speed'] > monster.stats['speed']:
                     input('You run away!  ' + used )
                     break
@@ -290,7 +307,7 @@ def fight(boss=False):
         else:
             action = input('What are you going to do? ')
             
-            if action == 'atk':
+            if action.lower() == 'atk':
                 for i in list(player['actions']['atk']):
                     print(i)
                 theAttack = input('Which attack? ')
@@ -305,12 +322,12 @@ def fight(boss=False):
                             input('You attack helplessly in the dark!  ' + used )
                 except:
                     input('That\'s not an attack!  ' + used )
-            elif action == 'dodge':
+            elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:     
                     dodging = True
                 else:
                     input('You don\'t have the dodge action!  ' + used )
-            elif action == 'run':
+            elif action.lower() == 'run':
                 if player['speed'] > monster.stats['speed']:
                     input('You run away!  ' + used )
                     break
@@ -318,7 +335,7 @@ def fight(boss=False):
                     input('You can\'t run away from a boss!  ' + used )
                 else:
                     input('You\'re to slow to run away!  ' + used )
-            elif action == 'items':
+            elif action.lower() == 'items':
                 lookInInventory()
             else:
                 input('That is not an option!  ' + used )
