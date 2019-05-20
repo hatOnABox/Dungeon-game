@@ -15,7 +15,6 @@ floor = 1
 light = 50
 
 
-
 # Key:
 # _ : wall
 # | : wall
@@ -49,26 +48,38 @@ def shop():
         option = input('Would you like to buy or sell? Or type in "cancel" ')
         if option.lower() == 'sell':
             for i in inventory:
-                print(i['name'] + 'cost: ' + str(i['price']))
+                print(i['name'] + ' cost: ' + str(i['price']))
             
             sellOption = input('Which item would you like to sell? ')
+            
+            try:
+                inventory.remove(i)
+                player['gold'] += int(round(i['price'] / 2))
+                input('You sold a ' + i['name'] + ' for ' + str(int(round(i['price'] / 2))) + ' gold! ' + used)
+            except:
+                input('You don\'t have that item! ' + used)
         elif option.lower() == 'buy':
             for i in shopInventory:
                 print(i['name'] + ' cost: ' + str(i['price']))
             
             buyOption = input('Which item would you like to buy? ')
             
+            x = False
             for i in shopInventory:
-                if buyOption.lower() == i['name'] and player['gold'] >= i['price']:
+                if i['name'] == buyOption.lower() and i['price'] <= player['gold']:
+                    player['gold'] -= i['price']
                     inventory.append(i)
-                    input('You have bought a ' + i['name'] + '! ' + used)
-                    shopInventory.remove(i)
+                    input('You have bought a ' + i['name'] + ' for ' + i['price'] + '! ' + used)
+                    x = True
                     break
-                elif buyOption.lower() == i['name'] and player['gold'] <= i['price']:
-                    input('You don\'t have enough gold to buy that item! ' + used)
+                elif i['name'] == buyOption.lower() and i['price'] > player['gold']:
+                    input('You don\'t have enough money to buy a ' + i['name'] +'!' + used)
+                    x = True
                     break
-                else:
-                    input('The vendor does not have that item! ' +used)
+            
+            if x == False:
+                input('The vendor does not have that item! ' + used)
+            
         elif option.lower() == 'cancel':
             break
 
@@ -384,6 +395,7 @@ def loop():
         
         print('\nHP: ' + str(player['hp']))
         print('Light level: ' + str(light))
+        print('Gold: ' + str(player['gold']))
         userInput = input('What are you going to do? ')
 
         
