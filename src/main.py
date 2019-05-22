@@ -8,7 +8,7 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'class': None, 'hp': 10, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue)'
 floor = 1
@@ -40,10 +40,12 @@ def choseClass():
     global player
     
     while True:
-        print('Mage\nFighter\nRouge\nRanger\n')
+        print('Chose your class: Mage or Fighter or Rouge or Ranger\n')
         userInput = input('Chose your class... ')
         if userInput.lower() != 'mage' or userInput.lower() != 'fighter' or userInput.lower() != 'rouge' or userInput.lower() != 'ranger':
             player['class'] = userInput.lower()
+            if player['class'] == 'mage':
+                player['actions']['magic'] = {'magic missel':{'dmg':10, 'mana':10}}
             break
         else:
             clear()
@@ -342,6 +344,14 @@ def fight(boss=False):
                     input('You\'re to slow to run away!  ' + used )
             elif action.lower() == 'items':
                 lookInInventory()
+            elif action.lower() == 'magic':
+                if player['class'] == 'mage':
+                    for i in list(player['actions']['atk']):
+                        print(i)
+                    
+                    theSpell = input('Which spell? ')
+                else:
+                    input('You do not know any magic! ' + used)
             else:
                 input('That is not an option!  ' + used )
             
