@@ -8,9 +8,9 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'class': None, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'meleeBonus': 0, 'rangerBonus': 0, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
-used = '(Press enter to continue)'
+used = '(Press enter to continue) '
 floor = 1
 light = 50
 
@@ -40,12 +40,20 @@ def choseClass():
     global player
     
     while True:
-        print('Chose your class: Mage or Fighter or Rouge or Ranger\n')
+        print('Chose your class: Mage or Fighter or Rouge or Ranger')
         userInput = input('Chose your class... ')
         if userInput.lower() != 'mage' or userInput.lower() != 'fighter' or userInput.lower() != 'rouge' or userInput.lower() != 'ranger':
             player['class'] = userInput.lower()
             if player['class'] == 'mage':
                 player['actions']['magic'] = {'magic missel':{'dmg':10, 'mana':10}}
+            elif player['class'] == 'rouge':
+                player['actions']['sneak'] = True
+            elif player['class'] == 'fighter':
+                player['maxHp'] += 5
+                player['meleeBonus'] = 2
+            elif player['class'] == 'ranger':
+                player['maxHp'] += 2
+                player['rangedBonus'] = 3
             break
         else:
             clear()
@@ -131,7 +139,7 @@ def lookInInventory():
         usedItem = False
         for i in inventory:
             print(i['name'])
-        itemName = input('Type in an item\'s items name to use it or type in "cancel"  ' + used )
+        itemName = input('Type in an item\'s items name to use it or type in "cancel"  ' + used)
         if itemName.lower() != 'cancel':
             for i in inventory:
                 if i['name'] == itemName.lower():
@@ -165,7 +173,7 @@ def lookInInventory():
                         else:
                             player['currentArmor'] = i
                             input ('You equipped ' + i['name'] + '!  ' + used )
-                    elif i['type'] == 'weapon':
+                    elif i['type'] == 'meleeWeapon' or i['type'] == 'rangedWeapon':
                         if i == player['currentWeapon']:
                             input('You have disarmed yourself  ' + used )
                             player['actions']['atk'].pop(i['name'])
@@ -173,7 +181,10 @@ def lookInInventory():
                         else:
                             player['currentWeapon'] = i
                             input('You have armed yourself with a ' + i['name'] + '  ' + used )
-                            player['actions']['atk'].update({i['name']: i['value']})
+                            if i['type'] == 'meleeWeapon':
+                                player['actions']['atk'].update({i['name']: i['value'] + player['meleeBonus']})
+                            elif i['type'] == 'rangedWeapon':
+                                player['actions']['atk'].update({i['name']: i['value'] + player['rangedBonus']})
                     else:
                         input('The item you wanted to use it not a consumable!  ' + used )
                     break
@@ -485,8 +496,8 @@ def loop():
                 elif map[beforeInput+map.index('\n')-1] == '!':
                     shop()
                 
-                if map[beforeInput+map.index('\n')-1] != '!':
-                    map[beforeInput+map.index('\n')-1] = '@'
+                if map[beforeInput-map.index('\n')-1] != '!':
+                    map[beforeInput-map.index('\n')-1] = '@'
                     map[beforeInput] = ' '
         elif userInput.lower() == 's':
             if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
@@ -525,6 +536,11 @@ def loop():
 
 
 if __name__ == '__main__':
-    clear()
-    loop()
-    clear()
+    try:
+        clear()
+        choseClass()
+        clear()
+        loop()
+        clear()
+    except KeyboardInterrupt:
+        clear()
