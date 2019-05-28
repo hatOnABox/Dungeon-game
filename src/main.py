@@ -13,6 +13,7 @@ inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue) '
 floor = 1
 light = 50
+sneaking = False
 
 
 # Key:
@@ -197,6 +198,7 @@ def lookInInventory():
 
 def fight(boss=False):
     global player
+    global sneaking
     
     boss = False
     
@@ -281,16 +283,24 @@ def fight(boss=False):
                     print(i)
                 theAttack = input('Which attack? ')
                 try:
-                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                    if light != 0:
-                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage!  ' + used )
+                    if sneaking == True and light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                        input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
+                    elif light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
                     else:
                         if randint(0, 1) == 1:
-                            input('You attack the monster for ' + str(player['actions']['atk']['punch']) + ' damage!  ' + used )
+                            if sneaking == True:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                                input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
+                            else:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
                         else:
-                            input('You attack helplessly in the dark!  ' + used )
+                            input('You attack helplessly in the dark! ' + used)
                 except:
-                    input('That\'s not an attack!  ' + used )
+                    input('That\'s not an attack! ' + used)
             elif action.lower() == 'magic':
                 if player['class'] == 'mage':
                     for i in list(player['actions']['atk']):
@@ -330,14 +340,22 @@ def fight(boss=False):
                     print(i)
                 theAttack = input('Which attack? ')
                 try:
-                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                    if light != 0:
-                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk']['punch']) + ' damage!  ' + used )
+                    if sneaking == True and light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                        input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
+                    elif light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
                     else:
                         if randint(0, 1) == 1:
-                            input('You attack the monster for ' + str(player['actions']['atk']['punch']) + ' damage!  ' + used )
+                            if sneaking == True:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                                input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
+                            else:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
                         else:
-                            input('You attack helplessly in the dark!  ' + used )
+                            input('You attack helplessly in the dark! ' + used)
                 except:
                     input('That\'s not an attack!  ' + used )
             elif action.lower() == 'dodge':
@@ -409,6 +427,7 @@ def fight(boss=False):
 def loop():
     global map
     global light
+    global sneaking
     
     while True:
         beforeInput = map.index('@')
@@ -521,8 +540,14 @@ def loop():
             break
         elif userInput.lower() == 'items':
             lookInInventory()
+        elif userInput.lower() == 'sneak':
+            if player['class'] == 'rouge':
+                input('You are now sneaking! ' + used)
+                sneaking = True
+            else:
+                input('You are not stealthy enough to be able to sneak!' + used)
         else:
-            input('That is not an option! (Press enter to continue) ')
+            input('That is not an option! ' + used)
 
 
         if light != 0:
