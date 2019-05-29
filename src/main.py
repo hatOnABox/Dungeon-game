@@ -8,7 +8,7 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'class': None, 'meleeBonus': 0, 'rangerBonus': 0, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'xp':0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue) '
 floor = 1
@@ -47,6 +47,7 @@ def choseClass():
             player['class'] = userInput.lower()
             if player['class'] == 'mage':
                 player['actions']['magic'] = {'magic missel':{'dmg':10, 'mana':10}}
+                player['maxHp'] -= 2
             elif player['class'] == 'rouge':
                 player['actions']['sneak'] = True
             elif player['class'] == 'fighter':
@@ -130,6 +131,14 @@ def interact():
         input('You found a chest and inside of the chest you found ' + itemGained['name'] + '!  ' + used )
 
 
+def levelUp():
+    player['xp'] = 0
+    player['level'] += 1
+    plyaer['xpGoal'] += 20
+    
+    
+
+
 def lookInInventory():
     global light
     
@@ -191,7 +200,7 @@ def lookInInventory():
                     break
             
             if gotItem == False:
-                input('You don\'t have that item!  ' + used  )
+                input('You don\'t have that item!  ' + used)
 
 
 
