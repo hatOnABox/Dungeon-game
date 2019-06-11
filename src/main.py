@@ -21,9 +21,9 @@ sneaking = False
 # | : wall
 # - : interactable
 # @ : player
-# ! : NPC
+# $ : NPC
 # # : enemy
-# $ : boss
+# ! : boss
 # empty space : nothing
 # % : stairs (leads the player up or down a level)
 # * : door
@@ -545,16 +545,16 @@ def loop():
                 if map[beforeInput+1] == '#':
                     if fight() == False:
                         break
-                elif map[beforeInput-1] == '$':
+                elif map[beforeInput-1] == '!':
                     if fight(boss=True)==False:
                         break
                 elif map[beforeInput+1] == '-':
                     interact()
                     
-                elif map[beforeInput+1] == '!':
+                elif map[beforeInput+1] == '$':
                     shop()
                 
-                if map[beforeInput+1] != '!':
+                if map[beforeInput+1] != '$':
                     map[beforeInput+1] = '@'
                     map[beforeInput] = ' '
         elif userInput.lower() == 'a':
@@ -564,16 +564,16 @@ def loop():
                 if map[beforeInput-1] == '#':
                     if fight() == False:
                         break
-                elif map[beforeInput-1] == '$':
+                elif map[beforeInput-1] == '!':
                     if fight(boss=True)==False:
                         break
                 elif map[beforeInput-1] == '-':
                     interact()
                     
-                elif map[beforeInput-1] == '!':
+                elif map[beforeInput-1] == '$':
                     shop()
                 
-                if map[beforeInput-1] != '!':
+                if map[beforeInput-1] != '$':
                     map[beforeInput-1] = '@'
                     map[beforeInput] = ' '
         elif userInput.lower() == 'w':
@@ -583,16 +583,16 @@ def loop():
                 if map[beforeInput-map.index('\n')-1] == '#':
                     if fight() == False:
                         break
-                elif map[beforeInput-map.index('\n')-1] == '$':
+                elif map[beforeInput-map.index('\n')-1] == '!':
                     if fight(boss=True)==False:
                         break
                 elif map[beforeInput-map.index('\n')-1] == '-':
                     interact()
                 
-                elif map[beforeInput+map.index('\n')-1] == '!':
+                elif map[beforeInput+map.index('\n')-1] == '$':
                     shop()
                 
-                if map[beforeInput-map.index('\n')-1] != '!':
+                if map[beforeInput-map.index('\n')-1] != '$':
                     map[beforeInput-map.index('\n')-1] = '@'
                     map[beforeInput] = ' '
         elif userInput.lower() == 's':
@@ -602,15 +602,15 @@ def loop():
                 if map[beforeInput+map.index('\n')+1] == '#':
                     if fight() == False:
                         break
-                elif map[beforeInput+map.index('\n')+1] == '$':
+                elif map[beforeInput+map.index('\n')+1] == '!':
                     if fight(boss=True)==False:
                         break
                 elif map[beforeInput+map.index('\n')+1] == '-':
                     interact()
-                elif map[beforeInput+map.index('\n')+1] == '!':
+                elif map[beforeInput+map.index('\n')+1] == '$':
                     shop()
                 
-                if map[beforeInput+map.index('\n')+1] != '!':
+                if map[beforeInput+map.index('\n')+1] != '$':
                     map[beforeInput+map.index('\n')+1] = '@'
                     map[beforeInput] = ' '
         elif userInput.lower() == 'exit':
