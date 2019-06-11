@@ -8,7 +8,7 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'class': None, 'xp':0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':20, 'maxMana':20, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'armorBonus': 1, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue) '
 floor = 1
@@ -43,23 +43,38 @@ def choseClass():
     while True:
         print('Chose your class: Mage or Fighter or Rouge or Ranger')
         userInput = input('Chose your class... ')
-        if userInput.lower() != 'mage' or userInput.lower() != 'fighter' or userInput.lower() != 'rouge' or userInput.lower() != 'ranger':
-            player['class'] = userInput.lower()
-            if player['class'] == 'mage':
-                player['actions']['magic'] = {'magic missel':{'dmg':10, 'mana':10}}
-                player['maxHp'] -= 2
-            elif player['class'] == 'rouge':
-                player['actions']['sneak'] = True
-            elif player['class'] == 'fighter':
-                player['maxHp'] += 5
-                player['meleeBonus'] = 2
-            elif player['class'] == 'ranger':
-                player['maxHp'] += 2
-                player['rangedBonus'] = 3
+        if userInput.lower() == 'mage':
+            player['class'] = 'mage'
+            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'dmg':10, 'value':'attack'}
+            player['maxHp'] -= 2
+            player['maxMana'] = 20
+            player['mana'] = 20
+            player['healthGain'] = 2
+            break
+        elif userInput.lower() == 'rouge':
+            player['class'] = 'rouge'
+            player['actions']['sneak'] = True
+            player['healthGain'] = 3
+            break
+        elif userInput.lower() == 'fighter':
+            player['class'] = 'fighter'
+            player['maxHp'] += 5
+            player['meleeBonus'] = 2
+            player['healthgain'] = 5
+            player['armorBonus'] += 1
+            break
+        elif userInput.lower() == 'ranger':
+            player['class'] = 'ranger'
+            player['maxHp'] += 2
+            player['rangedBonus'] = 3
+            player['healthGain'] = 2
             break
         else:
+            input('That\'s not a class! ' + used)
             clear()
-        
+    player['hp'] = player['maxHp']
+    clear()
+
 
 def shop():
     global inventory
@@ -132,11 +147,22 @@ def interact():
 
 
 def levelUp():
-    player['xp'] = 0
+    global player
+    
+    player['xp'] -= player['xpGoal']
     player['level'] += 1
-    plyaer['xpGoal'] += 20
+    player['xpGoal'] += 20
     
+    if player['class'] == 'mage':
+        player['maxMana'] += 5
+        player['mana'] = player['maxMana']
+        player['magic'][magic.magicByLevel[str(player['level'])]['name']] = magic.magicByLevel[str(player)]
+        
     
+    player['maxHp'] = player['maxHp'] + player['healthGain']
+    player['hp'] = player['maxHp']
+        
+
 
 
 def lookInInventory():
@@ -179,9 +205,9 @@ def lookInInventory():
                     elif i['type'] == 'armor':
                         if i == player['currentArmor']:
                             input('You took of the ' + i['name'] + '.  ' + used )
-                            player['currentArmor'] = {'value':1}
+                            player['currentArmor'] = {'value':0}
                         else:
-                            player['currentArmor'] = i
+                            player['currentArmor'] = i + player['armorBonus']
                             input ('You equipped ' + i['name'] + '!  ' + used )
                     elif i['type'] == 'meleeWeapon' or i['type'] == 'rangedWeapon':
                         if i == player['currentWeapon']:
@@ -312,13 +338,22 @@ def fight(boss=False):
                     input('That\'s not an attack! ' + used)
             elif action.lower() == 'magic':
                 if player['class'] == 'mage':
-                    for i in list(player['actions']['atk']):
+                    for i in player['actions']['magic']:
                         print(i)
                     
                     theSpell = input('Which spell? ')
+                    
+                    try:
+                        if player['actions']['magic'][theSpell]['value'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                            player['mana'] -= player['actions']['magic'][theSpell]['mana']
+                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['dmg']
+                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['dmg']) + ' damage! ' + used)
+                        else:
+                            input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
+                    except:
+                        input('That isn\'t a spell you know! ' + used)
                 else:
                     input('You do not know any magic! ' + used)
-                
             elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:
                     dodging = True
@@ -384,10 +419,21 @@ def fight(boss=False):
                 lookInInventory()
             elif action.lower() == 'magic':
                 if player['class'] == 'mage':
-                    for i in list(player['actions']['atk']):
+                    for i in player['actions']['magic']:
                         print(i)
                     
                     theSpell = input('Which spell? ')
+                    
+                    try:
+                        if player['actions']['magic'][theSpell]['value'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                            player['mana'] -= player['actions']['magic'][theSpell]['mana']
+                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['dmg']
+                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['dmg']) + ' damage! ' + used)
+                        else:
+                            input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
+                    except:
+                        input('That isn\'t a spell you know! ' + used)   
+                            
                 else:
                     input('You do not know any magic! ' + used)
             else:
@@ -470,7 +516,9 @@ def loop():
         userInput = input('What are you going to do? ')
 
         
-        if userInput.lower() == 'd':
+        if player['xp'] >= player['xpGoal']:
+            levelUp()
+        elif userInput.lower() == 'd':
             if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
                 input('You can\'t go that way!  ' + used )
             else:
