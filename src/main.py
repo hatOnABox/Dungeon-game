@@ -8,7 +8,7 @@ import traps
 openMap = open('map.txt', 'r')
 map = list(openMap.read())
 openMap.close()
-player = {'class': None, 'armorBonus': 1, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch]
 used = '(Press enter to continue) '
 floor = 1
@@ -28,7 +28,7 @@ sneaking = False
 # % : stairs (leads the player up or down a level)
 # * : door
 
-
+# clear the screen
 def clear(): 
   
     if name == 'nt': 
@@ -36,13 +36,14 @@ def clear():
     else: 
         system('clear')
 
-
+# this function gets ran at the begining of the game. This function allows the player to chose their class
 def choseClass():
     global player
     
     while True:
         print('Chose your class: Mage or Fighter or Rouge or Ranger')
         userInput = input('Chose your class... ')
+        # once the user chooses their class then their stats get changed
         if userInput.lower() == 'mage':
             player['class'] = 'mage'
             player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'dmg':10, 'value':'attack'}
@@ -61,21 +62,23 @@ def choseClass():
             player['maxHp'] += 5
             player['meleeBonus'] = 2
             player['healthgain'] = 5
-            player['armorBonus'] += 1
+            player['armorBonus'] = 2
             break
         elif userInput.lower() == 'ranger':
             player['class'] = 'ranger'
             player['maxHp'] += 2
             player['rangedBonus'] = 3
             player['healthGain'] = 2
+            player['armorBonus'] = 1
             break
         else:
+            # in case of invalid input
             input('That\'s not a class! ' + used)
             clear()
     player['hp'] = player['maxHp']
     clear()
 
-
+# When the player encounters a shopkeeper
 def shop():
     global inventory
     global player
@@ -123,29 +126,33 @@ def shop():
         elif option.lower() == 'cancel':
             break
 
-
+# if the player comes across an interactable
 def interact():
     global inventory
     
-    eventGen = randint(1, 6)
+    eventGen = randint(1, 6) # use a random number generator to determine what is going to happen to the playyer
+    # if the player gets a 1 then they fight
     if eventGen == 1:
         fight()
+    # if the player get a 2 or 3 then they get a trap
     elif eventGen == 2 or eventGen == 3:
         trap = choice(traps.listOftraps[str(floor)])
         player['hp'] -= trap['dmg']
         input('Out of nowhere ' + trap['name'] + ' attacks you! You take ' + str(trap['dmg']) + ' damage!  ' + used )
         if player['hp'] <= 0:
             input('YOU DIED!!!  ' + used )
+    # if the player gets a 4 or a 5 they get money
     elif eventGen == 4 or eventGen == 5:
         goldGained = randint(floor, floor*2)
         player['gold'] += goldGained
         input('You find a pot and you gain ' + str(goldGained) + ' gold!  ' + used )
+    # if the player gets a 6 they get treasure
     elif eventGen == 6:
         itemGained = choice(items.listOfItemsByPower[str(floor)])
         inventory.append(itemGained)
         input('You found a chest and inside of the chest you found ' + itemGained['name'] + '!  ' + used )
 
-
+# level up the player
 def levelUp():
     global player
     
@@ -157,14 +164,21 @@ def levelUp():
         player['maxMana'] += 5
         player['mana'] = player['maxMana']
         player['magic'][magic.magicByLevel[str(player['level'])]['name']] = magic.magicByLevel[str(player)]
+    elif player['class'] == 'fighter':
+        player['meleeBonus'] += 2
+        player['armorBonus'] += 2
+    elif player['class'] == 'ranger':
+        player['rangedBonus'] += 2
+        player['armorBonus'] += 1
+    elif player['class'] == 'rouge':
+        player['speed'] += 2
         
     
     player['maxHp'] = player['maxHp'] + player['healthGain']
     player['hp'] = player['maxHp']
-        
 
 
-
+# allows the player to look in their inventory
 def lookInInventory():
     global light
     
@@ -207,7 +221,8 @@ def lookInInventory():
                             input('You took of the ' + i['name'] + '.  ' + used )
                             player['currentArmor'] = {'value':0}
                         else:
-                            player['currentArmor'] = i + player['armorBonus']
+                            player['currentArmor'] = i
+                            player['currentArmor']['value'] += player['armorBonus']
                             input ('You equipped ' + i['name'] + '!  ' + used )
                     elif i['type'] == 'meleeWeapon' or i['type'] == 'rangedWeapon':
                         if i == player['currentWeapon']:
@@ -230,7 +245,7 @@ def lookInInventory():
 
 
 
-
+# when the player gets in a fight
 def fight(boss=False):
     global player
     global sneaking
@@ -257,6 +272,9 @@ def fight(boss=False):
     while True:
         clear()
         print('You are at ' + str(player['hp']) + ' hit points!')
+        
+        if player['class'] == 'mage':
+            print('You have ' + str(player['mana']) + ' mana!')
         if monster.stats['speed'] >= player['speed'] or light == 0:
             i = 0
             while i < monster.stats['actionsNum']:  
@@ -323,7 +341,7 @@ def fight(boss=False):
                         input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
                     elif light != 0:
                         monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
+                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )   
                     else:
                         if randint(0, 1) == 1:
                             if sneaking == True:
@@ -331,11 +349,12 @@ def fight(boss=False):
                                 input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
                             else:
                                 monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
+                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
                         else:
                             input('You attack helplessly in the dark! ' + used)
                 except:
                     input('That\'s not an attack! ' + used)
+                sneaking = False
             elif action.lower() == 'magic':
                 if player['class'] == 'mage':
                     for i in player['actions']['magic']:
@@ -402,6 +421,7 @@ def fight(boss=False):
                             input('You attack helplessly in the dark! ' + used)
                 except:
                     input('That\'s not an attack!  ' + used )
+                sneaking = False
             elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:     
                     dodging = True
