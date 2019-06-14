@@ -91,52 +91,92 @@ def shop(location):
     # the shopkeepers inventory
     shopInventory = []
     
+    # if there is no saved data about the shop ...
     if shopInventories[str(location)] == []:
+        # ... then add random items to the shop
         for i in range(0, floor*2):
             shopInventory.append(choice(items.listOfItemsByPower['1']))
+    # otherwise ...
     else:
+        # ... get the shop's inventory
         shopInventory = shopInventories[str(location)]
     
     while True:
+        # ask the user what they would like to do
         option = input('Would you like to buy or sell? Or type in "cancel" ')
+        
+        # if the user types in 'sell' ...
         if option.lower() == 'sell':
+            # ... then list out all the items in the player's inventory
             for i in inventory:
                 print(i['name'] + ' cost: ' + str(int(round(i['price'] / 2))))
             
-            sellOption = input('Which item would you like to sell? Or type in "cancel" ')
+            # ... ask the user which items they would like to sell
+            sellOption = input('Which item would you like to sell? ')
             
-            try:
-                inventory.remove(i)
-                player['gold'] += int(round(i['price'] / 2))
-                input('You sold a ' + i['name'] + ' for ' + str(int(round(i['price'] / 2))) + ' gold! ' + used)
-                shopInventory.append(i)
-            except:
+            itemToSell = {}
+            
+            # ... get every item in the player's inventory again
+            for i in inventory:
+                # ... if i's name is equals to the sellOption variable ...
+                if i['name'] == sellOption:
+                    # ... then assign itemToSell to i
+                    itemToSell = i
+            
+            # ... if itemToSell is not equals to an empty dict ...
+            if itemToSell != {}:
+                # ... then remove the item from the player's inventory, give the player the correct 
+                # amount of gold, and add the item to the shopkeepers inventory
+                inventory.remove(itemToSell)
+                player['gold'] += int(round(itemToSell['price'] / 2))
+                input('You sold a ' + itemToSell['name'] + ' for ' + str(int(round(itemToSell['price'] / 2))) + ' gold! ' + used)
+                shopInventory.append(itemToSell)
+            # ... otherwise ...
+            else:
+                # ... inform the player that they don't have the item they typed in
                 input('You don\'t have that item! ' + used)
+        # if the player types in 'buy' ...
         elif option.lower() == 'buy':
+            # ... print out the shop's inventory
             for i in shopInventory:
                 print(i['name'] + ' cost: ' + str(i['price']))
             
+            # ... ask the user which items they would like to buy
             buyOption = input('Which item would you like to buy? ')
             
-            x = False
+            x = False # used to determine if the item that the player is looking for is in the shop
+            
+            # ... loop through the entire shop's inventory
             for i in shopInventory:
+                # ... if the item's name is equal to the buyOption var and the player has enough
+                # gold to buy said item ...
                 if i['name'] == buyOption.lower() and i['price'] <= player['gold']:
+                    # ... then add the item to the player's inventory and subtract the player's gold 
+                    # by the price of the item
                     player['gold'] -= i['price']
                     inventory.append(i)
                     input('You have bought a ' + i['name'] + ' for ' + i['price'] + '! ' + used)
                     x = True
-                    break
+                # ... if the player doesn't have enough gold to buy the item but the vendor does 
+                # have the item they are looking for...
                 elif i['name'] == buyOption.lower() and i['price'] > player['gold']:
+                    # ... inform the player they do not have enough money to buy the item they 
+                    # are looking for
                     input('You don\'t have enough money to buy a ' + i['name'] +'!' + used)
                     x = True
-                    break
             
+            # ... if the item doesn't exist ...
             if x == False:
+                # ... inform the player that the shopkeeper doesn't have the item they are 
+                # looking for
                 input('The vendor does not have that item! ' + used)
-            
+            clear()
+        
+        # if the user types in cancel ...    
         elif option.lower() == 'cancel':
+            # ... then exit the shop
             break
-    shopInventories[str(location)] = shopInventory
+    shopInventories[str(location)] = shopInventory # store the shop's inventory
 
 
 # if the player comes across an interactable
@@ -780,8 +820,9 @@ def loop():
             break
         clear()
 
-
+# if the file is being ran directly
 if __name__ == '__main__':
+    # ... then run the game
     try:
         clear()
         choseClass()
