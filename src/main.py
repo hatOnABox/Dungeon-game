@@ -683,6 +683,8 @@ def loop():
     global light
     global sneaking
     global shopInventories
+    global floor
+    global openMap
     
     
     t = 0 # counter variable
@@ -698,8 +700,9 @@ def loop():
     del t # delete t
     
     while True:
+        newMap = False
         beforeInput = map.index('@')
-        
+
         # if light is not equal to 0...
         if light != 0:
             # then load the map and reveal what is near by to the player
@@ -728,7 +731,8 @@ def loop():
                 y+=1
         
         # load important player stats
-        print('\nHP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
+        print('\nFloor: ' + str(floor))
+        print('HP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
         if player['class'] == 'mage':
             print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
         print('Light level: ' + str(light))
@@ -771,12 +775,39 @@ def loop():
                     interact()
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput+1] == '$':
-                    # then shop with the shop keeper...
+                    # ...then shop with the shop keeper
                     shop(beforeInput+1)
-            
-            # if the space that the player tried to move to didn't have a shop keeper in it...
+                # if there are stairs in the way...
+                elif map[beforeInput+1] == '%':
+                    # ...then edit variables and get a new map
+                    floor += 1
+                    
+                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                    map = list(openMap.read())
+                    openMap.close()
+                    
+                    shopInventories = {}
+                    
+                    t = 0 # counter variable
+                    
+                    # while t is less then the amount of characters in the map ...
+                    while t < len(map):
+                        # ... then check for all of the '$' in the map ...
+                        if map[t] == '$':
+                            # ... for each '$' in the map make a inventory for them
+                            shopInventories[str(t)] = []
+                        t += 1 # increase t
+                    
+                    del t # delete t
+                    
+                    newMap = True
+                    
+                    input('You are now going to floor ' + str(floor) + '! ' + used)
+            # if the space that the player tried to move didn't have stairs ...
+            if newMap == False:   
+                # ... if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+1] != '$':
-                    # then move the player to the space they wanted to move to
+                    # ... then move the player to the space they wanted to move to
                     map[beforeInput+1] = '@'
                     map[beforeInput] = ' '
         # if the user input equals 'a' then move the player left
@@ -803,16 +834,43 @@ def loop():
                 elif map[beforeInput-1] == '-':
                     # ... then interact with the object
                     interact()
-            # if there is a shopkeeper in the way...
+                # if there is a shopkeeper in the way...
                 elif map[beforeInput-1] == '$':
-                    # then shop with the shop keeper...
+                    # ...then shop with the shop keeper
                     shop(beforeInput-1)
+                # if there are stairs in the way ...
+                elif map[beforeInput-1] == '%':
+                    # ...then edit variables and get a new map
+                    floor += 1
+                    
+                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                    map = list(openMap.read())
+                    openMap.close()
+                    
+                    shopInventories = {}
+                    
+                    t = 0 # counter variable
+                    
+                    # while t is less then the amount of characters in the map ...
+                    while t < len(map):
+                        # ... then check for all of the '$' in the map ...
+                        if map[t] == '$':
+                            # ... for each '$' in the map make a inventory for them
+                            shopInventories[str(t)] = []
+                        t += 1 # increase t
+                    
+                    del t # delete t
+                    
+                    input('You are now going to floor ' + str(floor) + '! ' + used)
+                    newMap = True
                 
-                # if the space that the player tried to move to didn't have a shop keeper in it...
-                if map[beforeInput-1] != '$':
-                    # then move the player to the space they wanted to move to
-                    map[beforeInput-1] = '@'
-                    map[beforeInput] = ' '
+                # if the space that the player tried to move didn't have stairs ...
+                if newMap == False:   
+                    # ... if the space that the player tried to move to didn't have a shop keeper in it...
+                    if map[beforeInput-1] != '$':
+                        # ... then move the player to the space they wanted to move to
+                        map[beforeInput-1] = '@'
+                        map[beforeInput] = ' '
         # if the user input equals 'w' then move the player up
         elif userInput.lower() == 'w':
             # if there is a wall in the way
@@ -838,15 +896,42 @@ def loop():
                     # ... then interact with the object
                     interact()
                 # if there is a shopkeeper in the way...
-                elif map[beforeInput+map.index('\n')-1] == '$':
-                    # then shop with the shop keeper...
-                    shop(beforeInput+map.index('\n')-1)
+                elif map[beforeInput-map.index('\n')-1] == '$':
+                    # ...then shop with the shop keeper
+                    shop(beforeInput-map.index('\n')-1)
+                # if there are stairs in the way...
+                elif map[beforeInput-map.index('\n')-1] == '%':
+                    # ...then edit variables and get a new map
+                    floor += 1
+                    
+                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                    map = list(openMap.read())
+                    openMap.close()
+                    
+                    shopInventories = {}
+                    
+                    t = 0 # counter variable
+                    
+                    # while t is less then the amount of characters in the map ...
+                    while t < len(map):
+                        # ... then check for all of the '$' in the map ...
+                        if map[t] == '$':
+                            # ... for each '$' in the map make a inventory for them
+                            shopInventories[str(t)] = []
+                        t += 1 # increase t
+                    
+                    del t # delete t
+                    
+                    input('You are now going to floor ' + str(floor) + '! ' + used)
+                    newMap = True
                 
-                # if the space that the player tried to move to didn't have a shop keeper in it...
-                if map[beforeInput-map.index('\n')-1] != '$':
-                    # then move the player to the space they wanted to move to
-                    map[beforeInput-map.index('\n')-1] = '@'
-                    map[beforeInput] = ' '
+                # if the space that the player tried to move didn't have stairs ...
+                if newMap == False:   
+                    # ... if the space that the player tried to move to didn't have a shop keeper in it...
+                    if map[beforeInput-map.index('\n')-1] != '$':
+                        # ... then move the player to the space they wanted to move to
+                        map[beforeInput-map.index('\n')-1] = '@'
+                        map[beforeInput] = ' '
         # if the user input equals 's' then...
         elif userInput.lower() == 's':
             # if there is a wall in the way
@@ -873,14 +958,41 @@ def loop():
                     interact()
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput+map.index('\n')+1] == '$':
-                    # then shop with the shop keeper...
+                    # ...then shop with the shop keeper
                     shop(beforeInput+map.index('\n')+1)
+                # if there are stairs in the way...
+                elif map[beforeInput+map.index('\n')+1] == '%':
+                    # ...then edit variables and get a new map
+                    floor += 1
+                    
+                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                    map = list(openMap.read())
+                    openMap.close()
+                    
+                    shopInventories = {}
+                    
+                    t = 0 # counter variable
+                    
+                    # while t is less then the amount of characters in the map ...
+                    while t < len(map):
+                        # ... then check for all of the '$' in the map ...
+                        if map[t] == '$':
+                            # ... for each '$' in the map make a inventory for them
+                            shopInventories[str(t)] = []
+                        t += 1 # increase t
+                    
+                    del t # delete t
+                    
+                    input('You are now going to floor ' + str(floor) + '! ' + used)
+                    newMap = True
                 
-                # if the space that the player tried to move to didn't have a shop keeper in it...
-                if map[beforeInput+map.index('\n')+1] != '$':
-                    # then move the player to the space they wanted to move to
-                    map[beforeInput+map.index('\n')+1] = '@'
-                    map[beforeInput] = ' '
+                # if the space that the player tried to move didn't have stairs ...
+                if newMap == False:   
+                    # ... if the space that the player tried to move to didn't have a shop keeper in it...
+                    if map[beforeInput+map.index('\n')+1] != '$':
+                        # ... then move the player to the space they wanted to move to
+                        map[beforeInput+map.index('\n')+1] = '@'
+                        map[beforeInput] = ' '
         # if the user input equals to 'exit' then exit the game
         elif userInput.lower() == 'exit':
             break
