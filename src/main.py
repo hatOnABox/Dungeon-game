@@ -11,7 +11,7 @@ map = list(openMap.read())
 openMap.close()
 
 # define the player's stats
-player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
+player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{}}
 inventory = [items.healingPotion_1, items.torch] # the player's inventory
 used = '(Press enter to continue) ' # this piece of text is used a LOT of times
 floor = 1 # the floor that the player is on
@@ -235,73 +235,132 @@ def levelUp():
 def lookInInventory():
     global light
     
+    # if the player's inventory is empty ...
     if inventory == []:
+        # ... then inform the player that they don't have any items
         input('You don\'t have any items!  ' + used )
+    # otherwise ...
     else:
+        # create variables that are used for conditional statements later on
         gotItem = False
         usedItem = False
+        
+        # loop through the player's inventory and print the name of each item they have
         for i in inventory:
             print(i['name'])
+        
+        # ask the user what item would they like to use
         itemName = input('Type in an item\'s items name to use it or type in "cancel"  ' + used)
+        
+        # if the user input is not equals to 'cancel' ...
         if itemName.lower() != 'cancel':
+            # ... loop through the player's inventory
             for i in inventory:
+                # ... if i's 'name' attribute is equals to the user input ...
                 if i['name'] == itemName.lower():
-                    gotItem = True
+                    gotItem = True # ... this is telling the program that the player got the item
+                    
+                    # ... if the item is a consumable ...
                     if i['consumable'] == True:
+                        
+                        # ... if the item is a healing item...
                         if i['type'] == 'healing':
+                            # ... if the player is as full health ...
                             if player['hp'] == player['maxHp']:
+                                # ... tell the player that they are full on health and prevent them
+                                # from using an item
                                 input('You are already at your max hp!  ' + used )
+                            # ... otherwise...
                             else:
+                                # ... increase the player's health by the healing value of the item
                                 player['hp'] += i['value']
+                                
+                                # ... if the player's health is greater than their max health ...
                                 if player['hp'] > player['maxHp']:
+                                    # ... then change the player's health so that it is equals to
+                                    # player's max health
                                     player['hp'] = player['maxHp']
-                                usedItem = True
+
+                                usedItem = True # ... tells the program that the player used an item
+                        # ... if the item is a light item ...
                         elif i['type'] == 'light':
+                            # ... if the light level is already at it's max ...
                             if light == 200:
+                                # ... then inform the player that they are already at max light
                                 input('You already have enought light!  ' + used )
+                            # ... otherwise ...
                             else:
+                                # ... increase the player's light level
                                 light += i['value']
+                                
+                                # ... if the light level is greater than 200 ...
                                 if light > 200:
+                                    # ... then lower it back to 200
                                     light = 200
-                                usedItem = True
+                                usedItem = True # ... tells program that the player used an item
+                        # ... if the item is a mana item ...
                         elif i['type'] == 'mana':
+                            # ... if the player is a mage ...
                             if player['class'] == 'mage' and player['mana'] != player['maxMana']:
+                                # ... then increase the player's mana
                                 player['mana'] += i['value']
+                                # ... if the player's mana is greater than the player's max mana ...
                                 if player['mana'] > player['maxMana']:
+                                    # ... then lower the player's mana back to it's max
                                     player['mana'] = player['maxMana']
-                                usedItem = True
+                                usedItem = True # ... tells program that the player used an item
+                            # ... otherwise ...
                             else:
-                                input('You don\'t need a mana potion! ' + used)
-                            
+                                # ... inform the player that they don't need to use a mana 
+                                # restoring item
+                                input('You don\'t that item! ' + used)
+                        
+                        # ... if the player used an item ...
                         if usedItem == True:
+                            # ... then remove the item from the player's inventory ...
                             inventory.remove(i)
                             input('You used a ' + i['name'] + '!  ' + used )
                     
+                    # ... if the item is a piece of armor ...
                     elif i['type'] == 'armor':
+                        # ... if the item is the player's current armor
                         if i == player['currentArmor']:
+                            # ... then dequip the item
                             input('You took of the ' + i['name'] + '.  ' + used )
-                            player['currentArmor'] = {'value':0}
+                            player['currentArmor'] = {'armor': 'unarmored', 'value':0}
+                        # ... otherwise ...
                         else:
+                            # ... equip the piece of armor
                             player['currentArmor'] = i
                             player['currentArmor']['value'] += player['armorBonus']
-                            input ('You equipped ' + i['name'] + '!  ' + used )
+                            input('You equipped ' + i['name'] + '!  ' + used )
+                    # ... if the item is a weapon ...
                     elif i['type'] == 'meleeWeapon' or i['type'] == 'rangedWeapon':
+                        # ... if the item is the current item that the player is wearing ...
                         if i == player['currentWeapon']:
+                            # ... then dequip the item
                             input('You have disarmed yourself  ' + used )
                             player['actions']['atk'].pop(i['name'])
                             player['currentWeapon'] = {}
+                        # ... otherwise ...
                         else:
+                            # ... equip the item
                             player['currentWeapon'] = i
                             input('You have armed yourself with a ' + i['name'] + '  ' + used )
+                            
+                            # ... apply ranged and melee weapon bonuses
                             if i['type'] == 'meleeWeapon':
                                 player['actions']['atk'].update({i['name']: i['value'] + player['meleeBonus']})
                             elif i['type'] == 'rangedWeapon':
                                 player['actions']['atk'].update({i['name']: i['value'] + player['rangedBonus']})
+                    # ... otherwise ...
                     else:
+                        # ... inform the player that they item they typed in isn't a consumable
                         input('The item you wanted to use it not a consumable!  ' + used )
                     break
-            
+            # ... if the player doesn't have the item they typed in ...
             if gotItem == False:
+                # ... inform the player they don't have it ...
                 input('You don\'t have that item!  ' + used)
 
 
@@ -613,6 +672,7 @@ def loop():
         print('\nHP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
         print('Light level: ' + str(light))
         print('Gold: ' + str(player['gold']))
+        print('Armor: ' + player['currentArmor']['name'])
         
         if player['class'] == 'mage':
             print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
