@@ -4,5 +4,6 @@ hideArmor = {'name':'hide armor', 'type':'armor', 'price': 35, 'consumable':Fals
 shortSword = {'name':'short sword', 'type':'meleeWeapon', 'consumable':False, 'value':7, 'price':40}
 shortBow = {'name':'short bow', 'type':'rangedWeapon', 'consumable': False, 'value':8, 'price':20}
 manaPotion_1 = {'name':'minor mana potion', 'type':'mana', 'value':20, 'price':60, 'consumable':True}
+mageStaff_1 = {'name':'minor mage staff', 'type':'staff', 'consumable':False, 'value':4, 'manaReduced':4, 'price': 50}
 
 listOfItemsByPower = {'1':[healingPotion_1, torch, hideArmor, shortSword, shortBow, manaPotion_1]}

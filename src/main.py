@@ -11,7 +11,7 @@ map = list(openMap.read())
 openMap.close()
 
 # define the player's stats
-player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk':{'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{'name':'none', 'value':0}}
+player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk':{'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{'name':'none', 'value':0, 'type':'fist'}}
 inventory = [items.healingPotion_1, items.torch] # the player's inventory
 used = '(Press enter to continue) ' # this piece of text is used a LOT of times
 floor = 1 # the floor that the player is on
@@ -347,13 +347,27 @@ def lookInInventory():
                         else:
                             # ... equip the item
                             player['currentWeapon'] = i
-                            input('You have armed yourself with a ' + i['name'] + '  ' + used )
+                            input('You have armed yourself with a ' + i['name'] + '! ' + used )
                             
                             # ... apply ranged and melee weapon bonuses
                             if i['type'] == 'meleeWeapon':
                                 player['actions']['atk'].update({i['name']: i['value'] + player['meleeBonus']})
                             elif i['type'] == 'rangedWeapon':
                                 player['actions']['atk'].update({i['name']: i['value'] + player['rangedBonus']})
+                    # ... if the item is a staff ...
+                    elif i['type'] == 'staff':
+                        # ... if the item is the current item that the player is wearing ...
+                        if i == player['currentWeapon']:
+                            # ... then dequip the item
+                            input('You have disarmed yourself  ' + used )
+                            player['actions']['atk'].pop(i['name'])
+                            player['currentWeapon'] = {}
+                        # ... otherwise ...
+                        else:
+                            # ... equip the item
+                            player['currentWeapon'] = i
+                            input('You have armed yourself with a ' + i['name'] + '! ' + used )
+                            
                     # ... otherwise ...
                     else:
                         # ... inform the player that they item they typed in isn't a consumable
@@ -370,6 +384,7 @@ def lookInInventory():
 def fight(boss=False):
     global player
     global sneaking
+    global light
     
     boss = False
     
@@ -484,12 +499,34 @@ def fight(boss=False):
                     theSpell = input('Which spell? ')
                     
                     try:
-                        if player['actions']['magic'][theSpell]['type'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
-                            player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                        if player['currentWeapon']['type'] == 'staff':
+                            if player['mana'] >= player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']:
+                                player['mana'] -= (player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced'])
+                                
+                                if player['actions']['magic'][theSpell]['type'] == 'light':
+                                    light += player['actions']['magic'][theSpell]['value']
+                                    if light > 200:
+                                        light = 200
+                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                            else:
+                                input('You don\'t have enough mana to cast that spell! ' + used)
                         else:
-                            input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
+                            if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                                player['mana'] -= player['actions']['magic'][theSpell]['mana']
+                                
+                                if player['actions']['magic'][theSpell]['type'] == 'light':
+                                    light += player['actions']['magic'][theSpell]['value']
+                                    if light > 200:
+                                        light = 200
+                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                            else:
+                                input('You don\'t have enough mana to cast that spell! ' + used)
                     except:
                         input('That isn\'t a spell you know! ' + used)
                 else:
@@ -566,15 +603,36 @@ def fight(boss=False):
                     theSpell = input('Which spell? ')
                     
                     try:
-                        if player['actions']['magic'][theSpell]['type'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
-                            player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                        if player['currentWeapon']['type'] == 'staff':
+                            if player['mana'] >= player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']:
+                                player['mana'] -= (player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced'])
+                                
+                                if player['actions']['magic'][theSpell]['type'] == 'light':
+                                    light += player['actions']['magic'][theSpell]['value']
+                                    if light > 200:
+                                        light = 200
+                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                            else:
+                                input('You don\'t have enough mana to cast that spell! ' + used)
                         else:
-                            input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
+                            if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                                player['mana'] -= player['actions']['magic'][theSpell]['mana']
+                                
+                                if player['actions']['magic'][theSpell]['type'] == 'light':
+                                    light += player['actions']['magic'][theSpell]['value']
+                                    if light > 200:
+                                        light = 200
+                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                            else:
+                                input('You don\'t have enough mana to cast that spell! ' + used)
                     except:
-                        input('That isn\'t a spell you know! ' + used)   
-                            
+                        input('That isn\'t a spell you know! ' + used)    
                 else:
                     input('You do not know any magic! ' + used)
             else:
@@ -856,6 +914,10 @@ def loop():
                         input('You can\'t use that spell here! ' + used)
                     elif player['actions']['magic'][str(userInput)]['type'] == 'light':
                         light += player['actions']['magic'][str(userInput)]['value']
+                        
+                        if light > 200:
+                            light = 200
+                        
                         input('You casted a light spell and increased your light levels by ' + str(player['actions']['magic'][str(userInput)]['value']) + '! ' + used)
                 # if the user input is invalid or is equals to a spell the user doesn't know
                 except:
