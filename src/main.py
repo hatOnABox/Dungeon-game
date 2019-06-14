@@ -11,7 +11,7 @@ map = list(openMap.read())
 openMap.close()
 
 # define the player's stats
-player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{}}
+player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk':{'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{'name':'none', 'value':0}}
 inventory = [items.healingPotion_1, items.torch] # the player's inventory
 used = '(Press enter to continue) ' # this piece of text is used a LOT of times
 floor = 1 # the floor that the player is on
@@ -225,6 +225,7 @@ def levelUp():
         player['armorBonus'] += 1
     elif player['class'] == 'rouge':
         player['speed'] += 2
+        player['meleeBonus'] += 1
         
     
     player['maxHp'] = player['maxHp'] + player['healthGain']
@@ -670,12 +671,13 @@ def loop():
         
         # load important player stats
         print('\nHP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
+        if player['class'] == 'mage':
+            print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
         print('Light level: ' + str(light))
         print('Gold: ' + str(player['gold']))
         print('Armor: ' + player['currentArmor']['name'])
-        
-        if player['class'] == 'mage':
-            print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
+        print('Weapon: ' + player['currentWeapon']['name'])
+    
         
         # if the player's xp is equal to or greater than to the player's xp goal then...
         if player['xp'] >= player['xpGoal']:
