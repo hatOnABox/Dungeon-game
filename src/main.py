@@ -3,17 +3,21 @@ from os import system, name
 import monsters
 import items
 import traps
+import magic
 
-
-openMap = open('map.txt', 'r')
+# get the first map
+openMap = open('maps/map1.txt', 'r')
 map = list(openMap.read())
 openMap.close()
+
+# define the player's stats
 player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk': {'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'value':1}, 'currentWeapon':{}}
-inventory = [items.healingPotion_1, items.torch]
-used = '(Press enter to continue) '
-floor = 1
-light = 50
-sneaking = False
+inventory = [items.healingPotion_1, items.torch] # the player's inventory
+used = '(Press enter to continue) ' # this piece of text is used a LOT of times
+floor = 1 # the floor that the player is on
+light = 50 # the amount of light in the room
+sneaking = False # if the player is sneaking
+shopInventories = {} # a list of all the inventories of shops
 
 
 # Key:
@@ -21,12 +25,12 @@ sneaking = False
 # | : wall
 # - : interactable
 # @ : player
-# $ : NPC
+# $ : shop
 # # : enemy
 # ! : boss
 # empty space : nothing
 # % : stairs (leads the player up or down a level)
-# * : door
+
 
 # clear the screen
 def clear(): 
@@ -46,7 +50,7 @@ def choseClass():
         # once the user chooses their class then their stats get changed
         if userInput.lower() == 'mage':
             player['class'] = 'mage'
-            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'dmg':10, 'value':'attack'}
+            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'value':10, 'type':'attack', 'reqCombat':'attack'}
             player['maxHp'] -= 2
             player['maxMana'] = 20
             player['mana'] = 20
@@ -79,26 +83,33 @@ def choseClass():
     clear()
 
 # When the player encounters a shopkeeper
-def shop():
+def shop(location):
     global inventory
     global player
+    global shopInventories
     
+    # the shopkeepers inventory
     shopInventory = []
-    for i in range(0, floor*2):
-        shopInventory.append(choice(items.listOfItemsByPower['1']))
+    
+    if shopInventories[str(location)] == []:
+        for i in range(0, floor*2):
+            shopInventory.append(choice(items.listOfItemsByPower['1']))
+    else:
+        shopInventory = shopInventories[str(location)]
     
     while True:
         option = input('Would you like to buy or sell? Or type in "cancel" ')
         if option.lower() == 'sell':
             for i in inventory:
-                print(i['name'] + ' cost: ' + str(i['price']))
+                print(i['name'] + ' cost: ' + str(int(round(i['price'] / 2))))
             
-            sellOption = input('Which item would you like to sell? ')
+            sellOption = input('Which item would you like to sell? Or type in "cancel" ')
             
             try:
                 inventory.remove(i)
                 player['gold'] += int(round(i['price'] / 2))
                 input('You sold a ' + i['name'] + ' for ' + str(int(round(i['price'] / 2))) + ' gold! ' + used)
+                shopInventory.append(i)
             except:
                 input('You don\'t have that item! ' + used)
         elif option.lower() == 'buy':
@@ -125,6 +136,8 @@ def shop():
             
         elif option.lower() == 'cancel':
             break
+    shopInventories[str(location)] = shopInventory
+
 
 # if the player comes across an interactable
 def interact():
@@ -163,7 +176,7 @@ def levelUp():
     if player['class'] == 'mage':
         player['maxMana'] += 5
         player['mana'] = player['maxMana']
-        player['magic'][magic.magicByLevel[str(player['level'])]['name']] = magic.magicByLevel[str(player)]
+        player['actions']['magic'][magic.magicByLevel[str(player['level'])]['name']] = magic.magicByLevel[str(player['level'])]
     elif player['class'] == 'fighter':
         player['meleeBonus'] += 2
         player['armorBonus'] += 2
@@ -211,6 +224,14 @@ def lookInInventory():
                                 if light > 200:
                                     light = 200
                                 usedItem = True
+                        elif i['type'] == 'mana':
+                            if player['class'] == 'mage' and player['mana'] != player['maxMana']:
+                                player['mana'] += i['value']
+                                if player['mana'] > player['maxMana']:
+                                    player['mana'] = player['maxMana']
+                                usedItem = True
+                            else:
+                                input('You don\'t need a mana potion! ' + used)
                             
                         if usedItem == True:
                             inventory.remove(i)
@@ -363,10 +384,10 @@ def fight(boss=False):
                     theSpell = input('Which spell? ')
                     
                     try:
-                        if player['actions']['magic'][theSpell]['value'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                        if player['actions']['magic'][theSpell]['type'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
                             player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['dmg']
-                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['dmg']) + ' damage! ' + used)
+                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
                     except:
@@ -445,10 +466,10 @@ def fight(boss=False):
                     theSpell = input('Which spell? ')
                     
                     try:
-                        if player['actions']['magic'][theSpell]['value'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                        if player['actions']['magic'][theSpell]['type'] == 'attack' and player['mana'] >= player['actions']['magic'][theSpell]['mana']:
                             player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['dmg']
-                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['dmg']) + ' damage! ' + used)
+                            monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                            input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You either don\'t have enough mana to cast that spell or that spell can\'t be used right now! ' + used)
                     except:
@@ -498,16 +519,32 @@ def fight(boss=False):
                 input('YOU DIED!!!  ' + used )
                 return False
         
-
+# the main game loop
 def loop():
     global map
     global light
     global sneaking
+    global shopInventories
+    
+    
+    t = 0 # counter variable
+    
+    # while t is less then the amount of characters in the map ...
+    while t < len(map):
+        # ... then check for all of the '$' in the map ...
+        if map[t] == '$':
+            # ... for each '$' in the map make a inventory for them
+            shopInventories[str(t)] = []
+        t += 1 # increase t
+    
+    del t # delete t
     
     while True:
         beforeInput = map.index('@')
         
+        # if light is not equal to 0...
         if light != 0:
+            # then load the map and reveal what is near by to the player
             y = 0
             while y < len(map):
                 if y == beforeInput + 1 or y == beforeInput - 1 or y == beforeInput-map.index('\n')-1 or y == beforeInput+map.index('\n')+1 or y == beforeInput+map.index('\n') or y == beforeInput+map.index('\n')+2 or y == beforeInput-map.index('\n') or y == beforeInput-map.index('\n')-2:
@@ -519,7 +556,9 @@ def loop():
                 else:
                     print('.', end='')
                 y+=1
+        # otherwise...
         else:
+            # load the map without revealing what is near to the player
             y = 0
             while y < len(map):
                 if map[y] == '\n':
@@ -530,109 +569,214 @@ def loop():
                     print('@', end='')
                 y+=1
         
-        print('\nHP: ' + str(player['hp']))
+        # load important player stats
+        print('\nHP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
         print('Light level: ' + str(light))
         print('Gold: ' + str(player['gold']))
-        userInput = input('What are you going to do? ')
-
         
+        if player['class'] == 'mage':
+            print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
+        
+        # if the player's xp is equal to or greater than to the player's xp goal then...
         if player['xp'] >= player['xpGoal']:
+            # ... level up the player
             levelUp()
-        elif userInput.lower() == 'd':
+            input('You are now level ' + str(player['level']) + '! ' + used)
+        
+        userInput = input('What are you going to do? ') # ask the player what are the going to do
+        
+        # if the user input equals to 'd' then move the player right
+        if userInput.lower() == 'd':
+            # if there is a wall in the way
             if map[beforeInput + 1] == '_' or map[beforeInput+1] == '|':
+                # don't allow the player to move
                 input('You can\'t go that way!  ' + used )
+            # otherwise...
             else:
+                # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput+1] == '#':
+                    # then fight...
                     if fight() == False:
+                        # if the player dies then break the while true loop
                         break
-                elif map[beforeInput-1] == '!':
+                # if there is a boss in the way...
+                elif map[beforeInput+1] == '!':
+                    # then boss fight...
                     if fight(boss=True)==False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a interactable in the way...
                 elif map[beforeInput+1] == '-':
+                    # ... then interact with the object
                     interact()
-                    
+                # if there is a shopkeeper in the way...
                 elif map[beforeInput+1] == '$':
-                    shop()
-                
+                    # then shop with the shop keeper...
+                    shop(beforeInput+1)
+            
+            # if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+1] != '$':
+                    # then move the player to the space they wanted to move to
                     map[beforeInput+1] = '@'
                     map[beforeInput] = ' '
+        # if the user input equals 'a' then move the player left
         elif userInput.lower() == 'a':
+            # if there is a wall in the way
             if map[beforeInput-1] == '_' or map[beforeInput-1] == '|':
+                # don't allow the player to move
                 input('You can\'t go that way!  ' + used )
+            # otherwise...
             else:
+                # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput-1] == '#':
+                    # then fight...
                     if fight() == False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a boss in the way...
                 elif map[beforeInput-1] == '!':
+                    # then boss fight...
                     if fight(boss=True)==False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a interactable in the way...
                 elif map[beforeInput-1] == '-':
+                    # ... then interact with the object
                     interact()
-                    
+            # if there is a shopkeeper in the way...
                 elif map[beforeInput-1] == '$':
-                    shop()
+                    # then shop with the shop keeper...
+                    shop(beforeInput-1)
                 
+                # if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput-1] != '$':
+                    # then move the player to the space they wanted to move to
                     map[beforeInput-1] = '@'
                     map[beforeInput] = ' '
+        # if the user input equals 'w' then move the player up
         elif userInput.lower() == 'w':
+            # if there is a wall in the way
             if map[beforeInput-map.index('\n')-1] == '_' or map[beforeInput-map.index('\n')-1] == '|':
+                # don't allow the player to move
                 input('You can\'t go that way!  ' + used )
+            # otherwise...
             else:
+                # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput-map.index('\n')-1] == '#':
+                    # then fight...
                     if fight() == False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a boss in the way...
                 elif map[beforeInput-map.index('\n')-1] == '!':
+                    # then boss fight...
                     if fight(boss=True)==False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a interactable in the way...
                 elif map[beforeInput-map.index('\n')-1] == '-':
+                    # ... then interact with the object
                     interact()
-                
+                # if there is a shopkeeper in the way...
                 elif map[beforeInput+map.index('\n')-1] == '$':
-                    shop()
+                    # then shop with the shop keeper...
+                    shop(beforeInput+map.index('\n')-1)
                 
+                # if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput-map.index('\n')-1] != '$':
+                    # then move the player to the space they wanted to move to
                     map[beforeInput-map.index('\n')-1] = '@'
                     map[beforeInput] = ' '
+        # if the user input equals 's' then...
         elif userInput.lower() == 's':
+            # if there is a wall in the way
             if map[beforeInput+map.index('\n')+1] == '_' or map[beforeInput+map.index('\n')+1] == '|':
+                # don't allow the player to move
                 input('You can\'t go that way!  ' + used )
+            # otherwise...
             else:
+                # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput+map.index('\n')+1] == '#':
+                    # then fight...
                     if fight() == False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a boss in the way...
                 elif map[beforeInput+map.index('\n')+1] == '!':
+                    # then boss fight...
                     if fight(boss=True)==False:
+                        # if the player dies then break the while true loop
                         break
+                # if there is a interactable in the way...
                 elif map[beforeInput+map.index('\n')+1] == '-':
+                    # ... then interact with the object
                     interact()
+                # if there is a shopkeeper in the way...
                 elif map[beforeInput+map.index('\n')+1] == '$':
-                    shop()
+                    # then shop with the shop keeper...
+                    shop(beforeInput+map.index('\n')+1)
                 
+                # if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+map.index('\n')+1] != '$':
+                    # then move the player to the space they wanted to move to
                     map[beforeInput+map.index('\n')+1] = '@'
                     map[beforeInput] = ' '
+        # if the user input equals to 'exit' then exit the game
         elif userInput.lower() == 'exit':
             break
+        # if the user input equals 'items' then look through the player's items
         elif userInput.lower() == 'items':
             lookInInventory()
+        # if the user input equals 'sneak' then...
         elif userInput.lower() == 'sneak':
+            # if the player's class is equal to a rouge...
             if player['class'] == 'rouge':
+                # then allow the player to sneak
                 input('You are now sneaking! ' + used)
                 sneaking = True
+            # otherwise...
             else:
+                # prevent the player from sneaking
                 input('You are not stealthy enough to be able to sneak!' + used)
+        # if the user input is equal to 'magic' ...
+        elif userInput.lower() == 'magic':
+            # if the player's class is equal to mage...
+            if player['class'] == 'mage':
+                # ... then allow the player to cast magic
+                for i in player['actions']['magic']:
+                        print(player['actions']['magic'][i]['name'])
+             
+                userInput = input('Which spell would you like to cast? ')
+                
+                # try to cast a spell
+                try:
+                    if player['actions']['magic'][str(userInput)]['reqCombat'] == True:
+                        input('You can\'t use that spell here! ' + used)
+                    elif player['actions']['magic'][str(userInput)]['type'] == 'light':
+                        light += player['actions']['magic'][str(userInput)]['value']
+                        input('You casted a light spell and increased your light levels by ' + str(player['actions']['magic'][str(userInput)]['value']) + '! ' + used)
+                # if the user input is invalid or is equals to a spell the user doesn't know
+                except:
+                    input('That isn\'t a spell you know! ' + used)
+            # otherwise ...
+            else:
+                # ... inform the user that they can't cast magic
+                input('You don\'t know how to cast magic! ' + used)
+        # otherwise ...
         else:
+            # tell the user that their input is invalid
             input('That is not an option! ' + used)
 
-
+        
+        # if the light is not equals to 0...
         if light != 0:
+            # ... then lower the light level if the user wasn't looking through their items
             if userInput.lower() != 'items':
                 light -= 1
         
-        
+        # if the user's health is lower than zero...
         if player['hp'] <= 0:
+            # ... then break the game
             break
         clear()
 

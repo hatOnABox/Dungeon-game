@@ -1,5 +1,4 @@
-magicMissel = {'name': 'magic missel', 'mana': 10, 'dmg':10, 'value':'attack'}
-light = {'name': 'light', 'mana': 5, 'value':'light'}
+light = {'name': 'light', 'mana': 5, 'type':'light', 'value':10, 'reqCombat': False}
 
 
-magicByLevel = {'1':magicMissel, '2':light}
+magicByLevel = {'2':light}
