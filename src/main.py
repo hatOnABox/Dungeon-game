@@ -55,11 +55,13 @@ def choseClass():
             player['maxMana'] = 20
             player['mana'] = 20
             player['healthGain'] = 2
+            inventory.append(items.manaPotion_1)
             break
         elif userInput.lower() == 'rouge':
             player['class'] = 'rouge'
             player['actions']['sneak'] = True
             player['healthGain'] = 3
+            player['speed'] += 2
             break
         elif userInput.lower() == 'fighter':
             player['class'] = 'fighter'
@@ -95,7 +97,7 @@ def shop(location):
     if shopInventories[str(location)] == []:
         # ... then add random items to the shop
         for i in range(0, floor*2):
-            shopInventory.append(choice(items.listOfItemsByPower['1']))
+            shopInventory.append(choice(items.listOfItemsByPower[str(floor)]))
     # otherwise ...
     else:
         # ... get the shop's inventory
@@ -190,8 +192,8 @@ def interact():
     # if the player get a 2 or 3 then they get a trap
     elif eventGen == 2 or eventGen == 3:
         trap = choice(traps.listOftraps[str(floor)])
-        player['hp'] -= trap['dmg']
-        input('Out of nowhere ' + trap['name'] + ' attacks you! You take ' + str(trap['dmg']) + ' damage!  ' + used )
+        player['hp'] -= (trap['dmg'] - player['currentArmor']['value'])
+        input('Out of nowhere ' + trap['name'] + ' attacks you! You take ' + str(trap['dmg'] - player['currentArmor']['value']) + ' damage!  ' + used )
         if player['hp'] <= 0:
             input('YOU DIED!!!  ' + used )
     # if the player gets a 4 or a 5 they get money
@@ -201,7 +203,10 @@ def interact():
         input('You find a pot and you gain ' + str(goldGained) + ' gold!  ' + used )
     # if the player gets a 6 they get treasure
     elif eventGen == 6:
-        itemGained = choice(items.listOfItemsByPower[str(floor)])
+        if floor != 1:
+            itemGained = choice(items.listOfItemsByPower[str(randint(floor-1, floor))])
+        else:
+            itemGained = choice(items.listOfItemsByPower['1'])
         inventory.append(itemGained)
         input('You found a chest and inside of the chest you found ' + itemGained['name'] + '!  ' + used )
 
@@ -389,6 +394,7 @@ def fight(boss=False):
     boss = False
     
     dodging = False
+    monsterDodging = False
     if boss == True:
         boss = True
         monster=choice(monsters.listOfBosses[str(floor)])
@@ -417,45 +423,33 @@ def fight(boss=False):
                 runAction = randint(0, actionsNum)
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
-                    if dodging == True:
-                        if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False:
-                            if light != 0:
-                                input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
-                            else:
-                                input('You\'re to slow to dodge the monster\'s attack!  ' + used )
+                    if dodging == True or sneaking == True:
+                        if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False and sneaking == False:
+                            input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
                             dodgedLastTurn = True
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
-                            if light != 0:
-                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['value']) + ' damage!  ' + used )
-                            else:
-                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                            monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
                         elif dodgedLastTurn == True:
                             input('You already dodged last turn! (Press enter to contimue) ')
                             dodgedLastTurn = False
                             runAttack = randint(1, attackNum)
                             currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                             player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
-                            if light != 0:    
-                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
-                            else:
-                                input('The monster makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
-                        else:
-                            if light != 0:
-                                input('You dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
-                            else:
-                                input('You dodge the monster\'s attack!  ' + used )
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                        else:   
+                            input('You dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
                             dodgedLastTurn = True
                         dodging = False
                     else:
                         runAttack = randint(1, attackNum)
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                        player['hp'] -=  monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
-                        if light != 0:
-                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
-                        else:
-                            input('The monster make a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                elif currentAction == 'dodge':
+                    monsterDodging = True
+                    dodging = False
                 i += 1
             
 
@@ -467,30 +461,34 @@ def fight(boss=False):
             action = input('What are you going to do? ')
             
             if action.lower() == 'atk':
-                
-                for i in list(player['actions']['atk']):
-                    print(i)
-                theAttack = input('Which attack? ')
-                try:
-                    if sneaking == True and light != 0:
-                        monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                        input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
-                    elif light != 0:
-                        monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )   
-                    else:
-                        if randint(0, 1) == 1:
-                            if sneaking == True:
-                                monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                                input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
-                            else:
-                                monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
+                if monsterDodging != True or monster.stats['speed'] > player['speed']:
+                    for i in list(player['actions']['atk']):
+                        print(i)
+                    theAttack = input('Which attack? ')
+                    try:
+                        if sneaking == True and light != 0:
+                            monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                            input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
+                        elif light != 0:
+                            monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                            input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )   
                         else:
-                            input('You attack helplessly in the dark! ' + used)
-                except:
-                    input('That\'s not an attack! ' + used)
-                sneaking = False
+                            if randint(0, 1) == 1:
+                                if sneaking == True:
+                                    monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                                    input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
+                                else:
+                                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                                    input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
+                            else:
+                                input('You attack helplessly in the dark! ' + used)
+                    except:
+                        input('That\'s not an attack! ' + used)
+                    sneaking = False
+                else:
+                    input('The monster dodged your attack! ' + used)
+                    sneaking = False
+                    monsterDodging = False
             elif action.lower() == 'magic':
                 if player['class'] == 'mage':
                     for i in player['actions']['magic']:
@@ -542,7 +540,7 @@ def fight(boss=False):
             elif action.lower() == 'run':
                 if player['speed'] > monster.stats['speed']:
                     input('You run away!  ' + used )
-                    break
+                    return 'ran'
                 elif boss == True:
                     input('You can\'t run away from a boss!  ' + used )
                 else:
@@ -552,34 +550,40 @@ def fight(boss=False):
             
             if monster.stats['hp'] <= 0:
                 input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
                 return True
         else:
             action = input('What are you going to do? ')
             
             if action.lower() == 'atk':
-                for i in list(player['actions']['atk']):
-                    print(i)
-                theAttack = input('Which attack? ')
-                try:
-                    if sneaking == True and light != 0:
-                        monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                        input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
-                    elif light != 0:
-                        monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
-                    else:
-                        if randint(0, 1) == 1:
-                            if sneaking == True:
-                                monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                                input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
-                            else:
-                                monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
+                if monsterDodging != True or monster.stats['speed'] > player['speed']:
+                    for i in list(player['actions']['atk']):
+                        print(i)
+                    theAttack = input('Which attack? ')
+                    try:
+                        if sneaking == True and light != 0:
+                            monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                            input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
+                        elif light != 0:
+                            monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                            input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
                         else:
-                            input('You attack helplessly in the dark! ' + used)
-                except:
-                    input('That\'s not an attack!  ' + used )
-                sneaking = False
+                            if randint(0, 1) == 1:
+                                if sneaking == True:
+                                    monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                                    input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
+                                else:
+                                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                                    input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
+                            else:
+                                input('You attack helplessly in the dark! ' + used)
+                    except:
+                        input('That\'s not an attack!  ' + used )
+                    sneaking = False
+                else:
+                    input('The monster dodged your attack! ' + used)
+                    sneaking = False
+                    monsterDodging = False
             elif action.lower() == 'dodge':
                 if 'dodge' in player['actions']:     
                     dodging = True
@@ -587,8 +591,8 @@ def fight(boss=False):
                     input('You don\'t have the dodge action!  ' + used )
             elif action.lower() == 'run':
                 if player['speed'] > monster.stats['speed']:
-                    input('You run away!  ' + used )
-                    break
+                    input('You run away! ' + used )
+                    return 'ran'
                 elif boss == True:
                     input('You can\'t run away from a boss!  ' + used )
                 else:
@@ -640,6 +644,7 @@ def fight(boss=False):
             
             if monster.stats['hp'] <= 0:
                 input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
                 return True
 
             i = 0
@@ -647,8 +652,8 @@ def fight(boss=False):
                 runAction = randint(0, actionsNum)
                 currentAction = list(monster.stats['actions'])[runAction]
                 if currentAction == 'atk':
-                    if dodging == True:
-                        if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False:
+                    if dodging == True or sneaking == True:
+                        if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False and sneaking == False:
                             input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
                             dodgedLastTurn = True
                             runAttack = randint(1, attackNum)
@@ -671,6 +676,9 @@ def fight(boss=False):
                         currentAttack = list(monster.stats['actions']['atk'])[runAttack]
                         player['hp'] -= monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
                         input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                elif currentAction == 'dodging':
+                    monsterDodging = True
+                    dodging = False
                 i += 1
             
             if player['hp'] <= 0:
@@ -700,6 +708,7 @@ def loop():
     del t # delete t
     
     while True:
+        ranAway = False
         newMap = False
         beforeInput = map.index('@')
 
@@ -759,10 +768,17 @@ def loop():
             else:
                 # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput+1] == '#':
-                    # then fight...
-                    if fight() == False:
-                        # if the player dies then break the while true loop
+                    # ... then fight
+                    newFight = fight()
+                    
+                    # ... if the player dies ...
+                    if newFight == False:
+                        # ... then break the game
                         break
+                    # ... if plaer runs away
+                    elif newFight == 'ran':
+                        # ... set the ranAway variable to true
+                        ranAway == True
                 # if there is a boss in the way...
                 elif map[beforeInput+1] == '!':
                     # then boss fight...
@@ -804,7 +820,7 @@ def loop():
                     
                     input('You are now going to floor ' + str(floor) + '! ' + used)
             # if the space that the player tried to move didn't have stairs ...
-            if newMap == False:   
+            if newMap == False or ranAway == False:   
                 # ... if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+1] != '$':
                     # ... then move the player to the space they wanted to move to
@@ -820,10 +836,17 @@ def loop():
             else:
                 # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput-1] == '#':
-                    # then fight...
-                    if fight() == False:
-                        # if the player dies then break the while true loop
+                    # ... then fight
+                    newFight = fight()
+                    
+                    # ... if the player dies ...
+                    if newFight == False:
+                        # ... then break the game
                         break
+                    # ... if plaer runs away
+                    elif newFight == 'ran':
+                        # ... set the ranAway variable to true
+                        ranAway == True
                 # if there is a boss in the way...
                 elif map[beforeInput-1] == '!':
                     # then boss fight...
@@ -865,7 +888,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs ...
-                if newMap == False:   
+                if newMap == False or ranAway == False:   
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -881,10 +904,17 @@ def loop():
             else:
                 # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput-map.index('\n')-1] == '#':
-                    # then fight...
-                    if fight() == False:
-                        # if the player dies then break the while true loop
+                    # ... then fight
+                    newFight = fight()
+                    
+                    # ... if the player dies ...
+                    if newFight == False:
+                        # ... then break the game
                         break
+                    # ... if plaer runs away
+                    elif newFight == 'ran':
+                        # ... set the ranAway variable to true
+                        ranAway == True
                 # if there is a boss in the way...
                 elif map[beforeInput-map.index('\n')-1] == '!':
                     # then boss fight...
@@ -926,7 +956,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs ...
-                if newMap == False:   
+                if newMap == False or ranAway == False: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-map.index('\n')-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -942,10 +972,17 @@ def loop():
             else:
                 # if there is a fight in the space that the player wants to move to...
                 if map[beforeInput+map.index('\n')+1] == '#':
-                    # then fight...
-                    if fight() == False:
-                        # if the player dies then break the while true loop
+                    # ... then fight
+                    newFight = fight()
+                    
+                    # ... if the player dies ...
+                    if newFight == False:
+                        # ... then break the game
                         break
+                    # ... if plaer runs away
+                    elif newFight == 'ran':
+                        # ... set the ranAway variable to true
+                        ranAway == True
                 # if there is a boss in the way...
                 elif map[beforeInput+map.index('\n')+1] == '!':
                     # then boss fight...
@@ -987,7 +1024,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs ...
-                if newMap == False:   
+                if newMap == False or ranAway == False: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput+map.index('\n')+1] != '$':
                         # ... then move the player to the space they wanted to move to
