@@ -824,8 +824,8 @@ def loop():
                     newMap = True
                     
                     input('You are now going to floor ' + str(floor) + '! ' + used)
-            # if the space that the player tried to move didn't have stairs ...
-            if newMap == False or ranAway == False:   
+            # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
+            if newMap == False or ranAway == True:   
                 # ... if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+1] != '$':
                     # ... then move the player to the space they wanted to move to
@@ -892,8 +892,8 @@ def loop():
                     input('You are now going to floor ' + str(floor) + '! ' + used)
                     newMap = True
                 
-                # if the space that the player tried to move didn't have stairs ...
-                if newMap == False or ranAway == False:   
+                # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
+                if newMap == False or ranAway == True:   
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -960,8 +960,8 @@ def loop():
                     input('You are now going to floor ' + str(floor) + '! ' + used)
                     newMap = True
                 
-                # if the space that the player tried to move didn't have stairs ...
-                if newMap == False or ranAway == False: 
+                # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
+                if newMap == False or ranAway == True: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-map.index('\n')-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -1028,8 +1028,8 @@ def loop():
                     input('You are now going to floor ' + str(floor) + '! ' + used)
                     newMap = True
                 
-                # if the space that the player tried to move didn't have stairs ...
-                if newMap == False or ranAway == False: 
+                # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
+                if newMap == False or ranAway == True: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput+map.index('\n')+1] != '$':
                         # ... then move the player to the space they wanted to move to
