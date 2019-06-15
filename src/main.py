@@ -413,10 +413,6 @@ def fight(boss=False):
 
     while True:
         clear()
-        print('You are at ' + str(player['hp']) + ' hit points!')
-        
-        if player['class'] == 'mage':
-            print('You have ' + str(player['mana']) + ' mana!')
         if monster.stats['speed'] >= player['speed'] or light == 0:
             i = 0
             while i < monster.stats['actionsNum']:  
@@ -457,7 +453,11 @@ def fight(boss=False):
                 input('YOU DIED!!!  ' + used )
                 return False
 
-
+            print('You are at ' + str(player['hp']) + ' hit points!')
+            
+            if player['class'] == 'mage':
+                print('You have ' + str(player['mana']) + ' mana!')
+            
             action = input('What are you going to do? ')
             
             if action.lower() == 'atk':
@@ -553,6 +553,11 @@ def fight(boss=False):
                 player['xp'] += monster.stats['xpGain']
                 return True
         else:
+            print('You are at ' + str(player['hp']) + ' hit points!')
+            
+            if player['class'] == 'mage':
+                print('You have ' + str(player['mana']) + ' mana!')
+            
             action = input('What are you going to do? ')
             
             if action.lower() == 'atk':
