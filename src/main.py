@@ -62,7 +62,6 @@ def choseClass():
             player['actions']['sneak'] = True
             player['healthGain'] = 2
             player['speed'] += 2
-            player['maxHp'] += 1
             break
         elif userInput.lower() == 'fighter':
             player['class'] = 'fighter'
