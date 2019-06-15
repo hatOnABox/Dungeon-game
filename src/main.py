@@ -188,7 +188,9 @@ def interact():
     eventGen = randint(1, 6) # use a random number generator to determine what is going to happen to the playyer
     # if the player gets a 1 then they fight
     if eventGen == 1:
-        fight()
+        newFight = fight()
+        if newFight == 'ran':
+            return 'ran'
     # if the player get a 2 or 3 then they get a trap
     elif eventGen == 2 or eventGen == 3:
         trap = choice(traps.listOftraps[str(floor)])
@@ -783,7 +785,7 @@ def loop():
                     # ... if plaer runs away
                     elif newFight == 'ran':
                         # ... set the ranAway variable to true
-                        ranAway == True
+                        ranAway = True
                 # if there is a boss in the way...
                 elif map[beforeInput+1] == '!':
                     # then boss fight...
@@ -793,7 +795,10 @@ def loop():
                 # if there is a interactable in the way...
                 elif map[beforeInput+1] == '-':
                     # ... then interact with the object
-                    interact()
+                    newInteract = interact()
+                    
+                    if newInteract == 'ran':
+                        ranAway = True
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput+1] == '$':
                     # ...then shop with the shop keeper
@@ -825,7 +830,7 @@ def loop():
                     
                     input('You are now going to floor ' + str(floor) + '! ' + used)
             # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
-            if newMap == False or ranAway == True:   
+            if newMap == False and ranAway == False:   
                 # ... if the space that the player tried to move to didn't have a shop keeper in it...
                 if map[beforeInput+1] != '$':
                     # ... then move the player to the space they wanted to move to
@@ -851,7 +856,7 @@ def loop():
                     # ... if plaer runs away
                     elif newFight == 'ran':
                         # ... set the ranAway variable to true
-                        ranAway == True
+                        ranAway = True
                 # if there is a boss in the way...
                 elif map[beforeInput-1] == '!':
                     # then boss fight...
@@ -861,7 +866,10 @@ def loop():
                 # if there is a interactable in the way...
                 elif map[beforeInput-1] == '-':
                     # ... then interact with the object
-                    interact()
+                    newInteract = interact()
+                    
+                    if newInteract == 'ran':
+                        ranAway = True
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput-1] == '$':
                     # ...then shop with the shop keeper
@@ -893,7 +901,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
-                if newMap == False or ranAway == True:   
+                if newMap == False and ranAway == False:   
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -916,10 +924,10 @@ def loop():
                     if newFight == False:
                         # ... then break the game
                         break
-                    # ... if plaer runs away
+                    # ... if player runs away
                     elif newFight == 'ran':
                         # ... set the ranAway variable to true
-                        ranAway == True
+                        ranAway = True
                 # if there is a boss in the way...
                 elif map[beforeInput-map.index('\n')-1] == '!':
                     # then boss fight...
@@ -929,7 +937,10 @@ def loop():
                 # if there is a interactable in the way...
                 elif map[beforeInput-map.index('\n')-1] == '-':
                     # ... then interact with the object
-                    interact()
+                    newInteract = interact()
+                    
+                    if newInteract == 'ran':
+                        ranAway = True
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput-map.index('\n')-1] == '$':
                     # ...then shop with the shop keeper
@@ -961,7 +972,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
-                if newMap == False or ranAway == True: 
+                if newMap == False and ranAway == False: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput-map.index('\n')-1] != '$':
                         # ... then move the player to the space they wanted to move to
@@ -987,7 +998,7 @@ def loop():
                     # ... if plaer runs away
                     elif newFight == 'ran':
                         # ... set the ranAway variable to true
-                        ranAway == True
+                        ranAway = True
                 # if there is a boss in the way...
                 elif map[beforeInput+map.index('\n')+1] == '!':
                     # then boss fight...
@@ -997,7 +1008,10 @@ def loop():
                 # if there is a interactable in the way...
                 elif map[beforeInput+map.index('\n')+1] == '-':
                     # ... then interact with the object
-                    interact()
+                    newInteract = interact()
+                    
+                    if newInteract == 'ran':
+                        ranAway = True
                 # if there is a shopkeeper in the way...
                 elif map[beforeInput+map.index('\n')+1] == '$':
                     # ...then shop with the shop keeper
@@ -1029,7 +1043,7 @@ def loop():
                     newMap = True
                 
                 # if the space that the player tried to move didn't have stairs or the player didn't run away from a fight...
-                if newMap == False or ranAway == True: 
+                if newMap == False and ranAway == False: 
                     # ... if the space that the player tried to move to didn't have a shop keeper in it...
                     if map[beforeInput+map.index('\n')+1] != '$':
                         # ... then move the player to the space they wanted to move to
