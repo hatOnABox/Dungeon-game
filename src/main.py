@@ -60,15 +60,16 @@ def choseClass():
         elif userInput.lower() == 'rouge':
             player['class'] = 'rouge'
             player['actions']['sneak'] = True
-            player['healthGain'] = 3
+            player['healthGain'] = 2
             player['speed'] += 2
+            player['maxHp'] += 1
             break
         elif userInput.lower() == 'fighter':
             player['class'] = 'fighter'
             player['maxHp'] += 5
             player['meleeBonus'] = 2
             player['healthgain'] = 5
-            player['armorBonus'] = 2
+            player['armorBonus'] = 1
             break
         elif userInput.lower() == 'ranger':
             player['class'] = 'ranger'
