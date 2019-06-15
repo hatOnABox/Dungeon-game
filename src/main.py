@@ -393,7 +393,6 @@ def fight(boss=False):
     global sneaking
     global light
     
-    boss = False
     
     dodging = False
     monsterDodging = False
