@@ -1,4 +1,6 @@
-Key:
+This is file is the key for all of the maps.
+
+key:
 _ = wall
 | = wall
 - = intractable
