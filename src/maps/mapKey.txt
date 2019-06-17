@@ -1,0 +1,10 @@
+Key:
+_ = wall
+| = wall
+- = intractable
+@ = player
+$ = shop
+# = enemy
+! = boss
+empty space = nothing
+% = stairs (leads the player down a level)

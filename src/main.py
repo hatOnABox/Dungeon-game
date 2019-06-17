@@ -20,18 +20,6 @@ sneaking = False # if the player is sneaking
 shopInventories = {} # a list of all the inventories of shops
 
 
-# Key:
-# _ : wall
-# | : wall
-# - : interactable
-# @ : player
-# $ : shop
-# # : enemy
-# ! : boss
-# empty space : nothing
-# % : stairs (leads the player up or down a level)
-
-
 # clear the screen
 def clear(): 
   
