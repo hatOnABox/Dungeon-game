@@ -231,8 +231,9 @@ def levelUp():
         player['rangedBonus'] += 2
         player['armorBonus'] += 1
     elif player['class'] == 'rouge':
-        player['speed'] += 2
+        player['speed'] += 1
         player['meleeBonus'] += 1
+    player['speed'] += 1
         
     
     player['maxHp'] = player['maxHp'] + player['healthGain']
@@ -750,6 +751,11 @@ def loop():
         print('HP: ' +  str(player['hp']) + '/' + str(player['maxHp']))
         if player['class'] == 'mage':
             print('Mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
+        elif player['class'] == 'rouge':
+            if sneaking == False:
+                print('Not stealthing')
+            else:
+                print('stealthing')
         print('Light level: ' + str(light))
         print('Gold: ' + str(player['gold']))
         print('Armor: ' + player['currentArmor']['name'])
@@ -1104,6 +1110,11 @@ def loop():
             # ... then lower the light level if the user wasn't looking through their items
             if userInput.lower() != 'items':
                 light -= 1
+        
+        
+        if userInput.lower() != 'sneak':
+            sneaking = False
+        
         
         # if the user's health is lower than zero...
         if player['hp'] <= 0:
