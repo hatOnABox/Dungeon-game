@@ -40,7 +40,7 @@ def choseClass():
             player['class'] = 'mage'
             player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 8, 'value':10, 'type':'attack', 'reqCombat':True}
             player['actions']['magic']['light'] = {'name': 'light', 'mana': 5, 'type':'light', 'value':10, 'reqCombat': False}
-            player['maxHp'] -= 2
+            player['maxHp'] -= 1
             player['maxMana'] = 20
             player['mana'] = 20
             player['healthGain'] = 2
@@ -238,10 +238,10 @@ def playerAction(monster, monsterDodging):
     global light
     
     while True:
-        print('You are at ' + str(player['hp']) + ' hit points!')
+        print('hp: ' + str(player['hp']) + '/' + str(player['maxHp']))
         
         if player['class'] == 'mage':
-            print('You have ' + str(player['mana']) + ' mana!')
+            print('mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
         
         
         action = input('What are you going to do? (Type in "help" for a list of actions) ')
