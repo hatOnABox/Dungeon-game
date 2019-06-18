@@ -243,6 +243,7 @@ def playerAction(monster, monsterDodging):
         
         action = input('What are you going to do? (Type in "help" for a list of actions) ')
         
+        didAnAction = True
         
         if action.lower() == 'help':
             print('''Atk - shows the player a list of their attacks. The player can then type the name of the attack they want to do.\nMagic - allows the player to cast magic (only works if the player is a wizard)\nDodge - allows the player to dodge the monsters next attack\nRun - allows the player to attempt to run away from the monster\nItems - allows the player to look through their inventory and use items''')
@@ -270,14 +271,20 @@ def playerAction(monster, monsterDodging):
                                 input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
                         else:
                             input('You attack helplessly in the dark! ' + used)
+                    sneaking = False
                 except:
                     input('That\'s not an attack! ' + used)
-                sneaking = False
+                    didAnAction = False
             else:
                 input('The monster dodged your attack! ' + used)
                 sneaking = False
                 monsterDodging = False
-            break
+            
+            if monster.stats['hp'] <= 0:
+                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
+                return True
+            
         elif action.lower() == 'magic':
             if player['class'] == 'mage':
                 for i in player['actions']['magic']:
@@ -300,6 +307,7 @@ def playerAction(monster, monsterDodging):
                                 input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You don\'t have enough mana to cast that spell! ' + used)
+                            didAnAction = False
                     else:
                         if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
                             player['mana'] -= player['actions']['magic'][theSpell]['mana']
@@ -314,11 +322,19 @@ def playerAction(monster, monsterDodging):
                                 input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You don\'t have enough mana to cast that spell! ' + used)
+                            didAnAction = False
                 except:
                     input('That isn\'t a spell you know! ' + used)
+                    didAnAction = False
             else:
                 input('You do not know any magic! ' + used)
-            break
+                didAnAction = False
+
+            if monster.stats['hp'] <= 0:
+                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
+                return True
+            
         elif action.lower() == 'dodge':
             if 'dodge' in player['actions']:
                 dodging = True
@@ -326,6 +342,7 @@ def playerAction(monster, monsterDodging):
             else:
                 input('You don\'t have the dodge action!  ' + used )
                 dodgedLastTurn = False
+                didAnAction = False
         elif action.lower() == 'items':
             lookInInventory()
             break
@@ -341,11 +358,12 @@ def playerAction(monster, monsterDodging):
         else:
             input('That is not an option!  ' + used )
             clear()
-        
-        if monster.stats['hp'] <= 0:
-            input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
-            player['xp'] += monster.stats['xpGain']
-            return True
+            didAnAction = False
+    
+        if didAnAction == True:
+            break
+        else:
+            clear()
     
 
 # allows the player to look in their inventory
