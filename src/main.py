@@ -57,6 +57,7 @@ def choseClass():
             player['meleeBonus'] = 2
             player['healthgain'] = 5
             player['armorBonus'] = 1
+            player['atk']['punch'] += player['meleeBonus']
             break
         elif userInput.lower() == 'ranger':
             player['class'] = 'ranger'
@@ -64,6 +65,7 @@ def choseClass():
             player['rangedBonus'] = 3
             player['healthGain'] = 2
             player['armorBonus'] = 1
+            inventory.append(items.sling)
             break
         else:
             # in case of invalid input
@@ -215,12 +217,12 @@ def levelUp():
     elif player['class'] == 'fighter':
         player['meleeBonus'] += 2
         player['armorBonus'] += 2
+        player['atk']['punch'] += player['meleeBonus']
     elif player['class'] == 'ranger':
         player['rangedBonus'] += 2
         player['armorBonus'] += 1
     elif player['class'] == 'rouge':
         player['speed'] += 1
-        player['meleeBonus'] += 1
     player['speed'] += 1
         
     

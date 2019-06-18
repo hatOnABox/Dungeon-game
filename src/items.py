@@ -7,5 +7,6 @@ manaPotion_1 = {'name':'minor mana potion', 'type':'mana', 'value':20, 'price':6
 mageStaff_1 = {'name':'minor mage staff', 'type':'staff', 'consumable':False, 'value':4, 'manaReduced':4, 'price': 50}
 longSword = {'name':'long sword', 'type':'meleeWeapon', 'consumable':False, 'value': 9, 'price': 50}
 leatherArmor = {'name':'leatherArmor', 'type':'armor', 'price': 45, 'consumable': False, 'value':2}
+sling = {'name':'sling', 'type':'rangedWeapon', 'consumable': False, 'value': 5, 'price':0}
 
 listOfItemsByPower = {'1':[healingPotion_1, torch, hideArmor, shortSword, shortBow, manaPotion_1], '2':[mageStaff_1, healingPotion_1, manaPotion_1, shortBow, longSword]}
