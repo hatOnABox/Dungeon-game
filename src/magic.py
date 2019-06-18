@@ -1,4 +1,3 @@
-light = {'name': 'light', 'mana': 5, 'type':'light', 'value':10, 'reqCombat': False}
+firebolt = {'name': 'firebolt', 'mana':10, 'value':12, 'type':'attack', 'reqCombat':True}
 
-
-magicByLevel = {'2':light}
+magicByLevel = {'2':firebolt}

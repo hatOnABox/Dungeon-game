@@ -38,7 +38,8 @@ def choseClass():
         # once the user chooses their class then their stats get changed
         if userInput.lower() == 'mage':
             player['class'] = 'mage'
-            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'value':10, 'type':'attack', 'reqCombat':'attack'}
+            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 8, 'value':10, 'type':'attack', 'reqCombat':True}
+            player['actions']['magic']['light'] = {'name': 'light', 'mana': 5, 'type':'light', 'value':10, 'reqCombat': False}
             player['maxHp'] -= 2
             player['maxMana'] = 20
             player['mana'] = 20
@@ -1052,7 +1053,7 @@ def loop():
                     if player['actions']['magic'][str(userInput)]['reqCombat'] == True:
                         input('You can\'t use that spell here! ' + used)
                     elif player['actions']['magic'][str(userInput)]['type'] == 'light':
-                        light += player['actions']['magic'][str(userInput)]['value']
+                        light += player['actions']['magic'][str(userInput)]['value'] + 1
                         
                         if light > 200:
                             light = 200
