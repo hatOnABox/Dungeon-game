@@ -761,9 +761,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -832,9 +836,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -903,9 +911,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -974,9 +986,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
