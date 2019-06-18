@@ -228,6 +228,126 @@ def levelUp():
     player['hp'] = player['maxHp']
 
 
+# used when player makes an actions in combat
+def playerAction(monster, monsterDodging):
+    global player
+    global sneaking
+    global light
+    
+    while True:
+        print('You are at ' + str(player['hp']) + ' hit points!')
+        
+        if player['class'] == 'mage':
+            print('You have ' + str(player['mana']) + ' mana!')
+        
+        
+        action = input('What are you going to do? (Type in "help" for a list of actions) ')
+        
+        
+        if action.lower() == 'help':
+            print('''Atk - shows the player a list of their attacks. The player can then type the name of the attack they want to do.\nMagic - allows the player to cast magic (only works if the player is a wizard)\nDodge - allows the player to dodge the monsters next attack\nRun - allows the player to attempt to run away from the monster\nItems - allows the player to look through their inventory and use items''')
+            input('(Press enter to continue)')
+            clear()
+        elif action.lower() == 'atk':
+            if monsterDodging != True or monster.stats['speed'] > player['speed']:
+                for i in list(player['actions']['atk']):
+                    print(i)
+                theAttack = input('Which attack? ')
+                try:
+                    if sneaking == True and light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                        input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
+                    elif light != 0:
+                        monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                        input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )   
+                    else:
+                        if randint(0, 1) == 1:
+                            if sneaking == True:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
+                                input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
+                            else:
+                                monster.stats['hp'] -= player['actions']['atk'][theAttack]
+                                input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
+                        else:
+                            input('You attack helplessly in the dark! ' + used)
+                except:
+                    input('That\'s not an attack! ' + used)
+                sneaking = False
+            else:
+                input('The monster dodged your attack! ' + used)
+                sneaking = False
+                monsterDodging = False
+            break
+        elif action.lower() == 'magic':
+            if player['class'] == 'mage':
+                for i in player['actions']['magic']:
+                    print(i)
+                
+                theSpell = input('Which spell? ')
+    
+                try:
+                    if player['currentWeapon']['type'] == 'staff':
+                        if player['mana'] >= player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']:
+                            player['mana'] -= (player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced'])
+                            
+                            if player['actions']['magic'][theSpell]['type'] == 'light':
+                                light += player['actions']['magic'][theSpell]['value']
+                                if light > 200:
+                                    light = 200
+                                input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                            elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                        else:
+                            input('You don\'t have enough mana to cast that spell! ' + used)
+                    else:
+                        if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
+                            player['mana'] -= player['actions']['magic'][theSpell]['mana']
+                            
+                            if player['actions']['magic'][theSpell]['type'] == 'light':
+                                light += player['actions']['magic'][theSpell]['value']
+                                if light > 200:
+                                    light = 200
+                                input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
+                            elif player['actions']['magic'][theSpell]['type'] == 'attack':
+                                monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
+                                input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
+                        else:
+                            input('You don\'t have enough mana to cast that spell! ' + used)
+                except:
+                    input('That isn\'t a spell you know! ' + used)
+            else:
+                input('You do not know any magic! ' + used)
+            break
+        elif action.lower() == 'dodge':
+            if 'dodge' in player['actions']:
+                dodging = True
+                return 'dodging'
+            else:
+                input('You don\'t have the dodge action!  ' + used )
+                dodgedLastTurn = False
+        elif action.lower() == 'items':
+            lookInInventory()
+            break
+        elif action.lower() == 'run':
+            if player['speed'] > monster.stats['speed']:
+                input('You run away!  ' + used )
+                return 'ran'
+            elif boss == True:
+                input('You can\'t run away from a boss!  ' + used )
+            else:
+                input('You\'re to slow to run away!  ' + used )
+            break
+        else:
+            input('That is not an option!  ' + used )
+            clear()
+        
+        if monster.stats['hp'] <= 0:
+            input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+            player['xp'] += monster.stats['xpGain']
+            return True
+    
+
 # allows the player to look in their inventory
 def lookInInventory():
     global light
@@ -442,205 +562,27 @@ def fight(boss=False):
             if player['hp'] <= 0:
                 input('YOU DIED!!!  ' + used )
                 return False
-
-            print('You are at ' + str(player['hp']) + ' hit points!')
             
-            if player['class'] == 'mage':
-                print('You have ' + str(player['mana']) + ' mana!')
+            playersAction = playerAction(monster, monsterDodging)
             
-            action = input('What are you going to do? ')
-            
-            if action.lower() == 'atk':
-                if monsterDodging != True or monster.stats['speed'] > player['speed']:
-                    for i in list(player['actions']['atk']):
-                        print(i)
-                    theAttack = input('Which attack? ')
-                    try:
-                        if sneaking == True and light != 0:
-                            monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                            input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
-                        elif light != 0:
-                            monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                            input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )   
-                        else:
-                            if randint(0, 1) == 1:
-                                if sneaking == True:
-                                    monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                                    input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
-                                else:
-                                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                                    input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
-                            else:
-                                input('You attack helplessly in the dark! ' + used)
-                    except:
-                        input('That\'s not an attack! ' + used)
-                    sneaking = False
-                else:
-                    input('The monster dodged your attack! ' + used)
-                    sneaking = False
-                    monsterDodging = False
-            elif action.lower() == 'magic':
-                if player['class'] == 'mage':
-                    for i in player['actions']['magic']:
-                        print(i)
-                    
-                    theSpell = input('Which spell? ')
-                    
-                    try:
-                        if player['currentWeapon']['type'] == 'staff':
-                            if player['mana'] >= player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']:
-                                player['mana'] -= (player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced'])
-                                
-                                if player['actions']['magic'][theSpell]['type'] == 'light':
-                                    light += player['actions']['magic'][theSpell]['value']
-                                    if light > 200:
-                                        light = 200
-                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
-                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
-                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
-                            else:
-                                input('You don\'t have enough mana to cast that spell! ' + used)
-                        else:
-                            if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
-                                player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                                
-                                if player['actions']['magic'][theSpell]['type'] == 'light':
-                                    light += player['actions']['magic'][theSpell]['value']
-                                    if light > 200:
-                                        light = 200
-                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
-                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
-                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
-                            else:
-                                input('You don\'t have enough mana to cast that spell! ' + used)
-                    except:
-                        input('That isn\'t a spell you know! ' + used)
-                else:
-                    input('You do not know any magic! ' + used)
-            elif action.lower() == 'dodge':
-                if 'dodge' in player['actions']:
-                    dodging = True
-                else:
-                    input('You don\'t have the dodge action!  ' + used )
-                    dodgedLastTurn = False
-            elif action.lower() == 'items':
-                lookInInventory()
-            elif action.lower() == 'run':
-                if player['speed'] > monster.stats['speed']:
-                    input('You run away!  ' + used )
-                    return 'ran'
-                elif boss == True:
-                    input('You can\'t run away from a boss!  ' + used )
-                else:
-                    input('You\'re to slow to run away!  ' + used )
-            else:
-                input('That is not an option!  ' + used )
-            
-            if monster.stats['hp'] <= 0:
-                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
-                player['xp'] += monster.stats['xpGain']
+            if playersAction == 'ran':
+                return 'ran'
+            elif playersAction == True:
                 return True
+            elif playersAction == 'dodging':
+                dodging = True
+                dodgingLastTurn = True
+            
         else:
-            print('You are at ' + str(player['hp']) + ' hit points!')
+            playersAction = playerAction(monster, monsterDodging)
             
-            if player['class'] == 'mage':
-                print('You have ' + str(player['mana']) + ' mana!')
-            
-            action = input('What are you going to do? ')
-            
-            if action.lower() == 'atk':
-                if monsterDodging != True or monster.stats['speed'] > player['speed']:
-                    for i in list(player['actions']['atk']):
-                        print(i)
-                    theAttack = input('Which attack? ')
-                    try:
-                        if sneaking == True and light != 0:
-                            monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                            input('Your sneak attack did ' + str(player['actions']['atk'][theAttack] * 2) + ' to the ' + monster.stats['name'] + '! ' + used)
-                        elif light != 0:
-                            monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                            input('You attack the ' + monster.stats['name'] + ' for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage!  ' + used )    
-                        else:
-                            if randint(0, 1) == 1:
-                                if sneaking == True:
-                                    monster.stats['hp'] -= player['actions']['atk'][theAttack] * 2
-                                    input('You sneak attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used )
-                                else:
-                                    monster.stats['hp'] -= player['actions']['atk'][theAttack]
-                                    input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)      
-                            else:
-                                input('You attack helplessly in the dark! ' + used)
-                    except:
-                        input('That\'s not an attack!  ' + used )
-                    sneaking = False
-                else:
-                    input('The monster dodged your attack! ' + used)
-                    sneaking = False
-                    monsterDodging = False
-            elif action.lower() == 'dodge':
-                if 'dodge' in player['actions']:     
-                    dodging = True
-                else:
-                    input('You don\'t have the dodge action!  ' + used )
-            elif action.lower() == 'run':
-                if player['speed'] > monster.stats['speed']:
-                    input('You run away! ' + used )
-                    return 'ran'
-                elif boss == True:
-                    input('You can\'t run away from a boss!  ' + used )
-                else:
-                    input('You\'re to slow to run away!  ' + used )
-            elif action.lower() == 'items':
-                lookInInventory()
-            elif action.lower() == 'magic':
-                if player['class'] == 'mage':
-                    for i in player['actions']['magic']:
-                        print(i)
-                    
-                    theSpell = input('Which spell? ')
-                    
-                    try:
-                        if player['currentWeapon']['type'] == 'staff':
-                            if player['mana'] >= player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']:
-                                player['mana'] -= (player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced'])
-                                
-                                if player['actions']['magic'][theSpell]['type'] == 'light':
-                                    light += player['actions']['magic'][theSpell]['value']
-                                    if light > 200:
-                                        light = 200
-                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
-                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
-                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
-                            else:
-                                input('You don\'t have enough mana to cast that spell! ' + used)
-                        else:
-                            if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
-                                player['mana'] -= player['actions']['magic'][theSpell]['mana']
-                                
-                                if player['actions']['magic'][theSpell]['type'] == 'light':
-                                    light += player['actions']['magic'][theSpell]['value']
-                                    if light > 200:
-                                        light = 200
-                                    input('You casted a light spell and increased the light level by ' + str(player['actions']['magic'][theSpell]['value']) + '! ' + used)
-                                elif player['actions']['magic'][theSpell]['type'] == 'attack':
-                                    monster.stats['hp'] -= player['actions']['magic'][theSpell]['value']
-                                    input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
-                            else:
-                                input('You don\'t have enough mana to cast that spell! ' + used)
-                    except:
-                        input('That isn\'t a spell you know! ' + used)    
-                else:
-                    input('You do not know any magic! ' + used)
-            else:
-                input('That is not an option!  ' + used )
-            
-            if monster.stats['hp'] <= 0:
-                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
-                player['xp'] += monster.stats['xpGain']
+            if playersAction == 'ran':
+                return 'ran'
+            elif playersAction == True:
                 return True
+            elif playersAction == 'dodging':
+                dodging = True
+                dodgingLastTurn = True
 
             i = 0
             while i < monster.stats['actionsNum']:  
@@ -756,7 +698,7 @@ def loop():
             levelUp()
             input('You are now level ' + str(player['level']) + '! ' + used)
         
-        userInput = input('What are you going to do? ') # ask the player what are the going to do
+        userInput = input('What are you going to do? (Type in "help" for a list of actions) ') # ask the player what are the going to do
         
         # if the user input equals to 'd' then move the player right
         if userInput.lower() == 'd':
@@ -1087,6 +1029,12 @@ def loop():
             else:
                 # ... inform the user that they can't cast magic
                 input('You don\'t know how to cast magic! ' + used)
+        # if the user types in 'help'
+        elif userInput.lower() == 'help':
+            # ... then give a list of commands to the player
+            clear()
+            print('''Help - bring this message back up again\nSneak - allows the player to stealth (only works if the player is a rouge)\na - move left\nd - move right\ns - move down\nw - move up\nmagic - allows the player to cast a spell (only works if the player is a wizard)\nitems - allows the player to look through their inventory and equip or use items\nexit - closes the game''')
+            input('(Press enter to continue)')
         # otherwise ...
         else:
             # tell the user that their input is invalid
@@ -1096,7 +1044,7 @@ def loop():
         # if the light is not equals to 0...
         if light != 0:
             # ... then lower the light level if the user wasn't looking through their items
-            if userInput.lower() != 'items':
+            if userInput.lower() != 'items' and userInput.lower() != 'help':
                 light -= 1
         
         
