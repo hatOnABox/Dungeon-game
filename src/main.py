@@ -38,8 +38,9 @@ def choseClass():
         # once the user chooses their class then their stats get changed
         if userInput.lower() == 'mage':
             player['class'] = 'mage'
-            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 10, 'value':10, 'type':'attack', 'reqCombat':'attack'}
-            player['maxHp'] -= 2
+            player['actions']['magic']['magic missel'] = {'name': 'magic missel', 'mana': 8, 'value':10, 'type':'attack', 'reqCombat':True}
+            player['actions']['magic']['light'] = {'name': 'light', 'mana': 5, 'type':'light', 'value':10, 'reqCombat': False}
+            player['maxHp'] -= 1
             player['maxMana'] = 20
             player['mana'] = 20
             player['healthGain'] = 2
@@ -57,6 +58,7 @@ def choseClass():
             player['meleeBonus'] = 2
             player['healthgain'] = 5
             player['armorBonus'] = 1
+            player['actions']['atk']['punch'] += player['meleeBonus']
             break
         elif userInput.lower() == 'ranger':
             player['class'] = 'ranger'
@@ -64,6 +66,7 @@ def choseClass():
             player['rangedBonus'] = 3
             player['healthGain'] = 2
             player['armorBonus'] = 1
+            inventory.append(items.sling)
             break
         else:
             # in case of invalid input
@@ -215,12 +218,12 @@ def levelUp():
     elif player['class'] == 'fighter':
         player['meleeBonus'] += 2
         player['armorBonus'] += 2
+        player['atk']['punch'] += player['meleeBonus']
     elif player['class'] == 'ranger':
         player['rangedBonus'] += 2
         player['armorBonus'] += 1
     elif player['class'] == 'rouge':
         player['speed'] += 1
-        player['meleeBonus'] += 1
     player['speed'] += 1
         
     
@@ -229,20 +232,21 @@ def levelUp():
 
 
 # used when player makes an actions in combat
-def playerAction(monster, monsterDodging):
+def playerAction(monster, monsterDodging, boss=False):
     global player
     global sneaking
     global light
     
     while True:
-        print('You are at ' + str(player['hp']) + ' hit points!')
+        print('hp: ' + str(player['hp']) + '/' + str(player['maxHp']))
         
         if player['class'] == 'mage':
-            print('You have ' + str(player['mana']) + ' mana!')
+            print('mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
         
         
         action = input('What are you going to do? (Type in "help" for a list of actions) ')
         
+        didAnAction = True
         
         if action.lower() == 'help':
             print('''Atk - shows the player a list of their attacks. The player can then type the name of the attack they want to do.\nMagic - allows the player to cast magic (only works if the player is a wizard)\nDodge - allows the player to dodge the monsters next attack\nRun - allows the player to attempt to run away from the monster\nItems - allows the player to look through their inventory and use items''')
@@ -270,14 +274,20 @@ def playerAction(monster, monsterDodging):
                                 input('You attack the monster for ' + str(player['actions']['atk'][str(theAttack)]) + ' damage! ' + used)    
                         else:
                             input('You attack helplessly in the dark! ' + used)
+                    sneaking = False
                 except:
                     input('That\'s not an attack! ' + used)
-                sneaking = False
+                    didAnAction = False
             else:
                 input('The monster dodged your attack! ' + used)
                 sneaking = False
                 monsterDodging = False
-            break
+            
+            if monster.stats['hp'] <= 0:
+                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
+                return True
+            
         elif action.lower() == 'magic':
             if player['class'] == 'mage':
                 for i in player['actions']['magic']:
@@ -300,6 +310,7 @@ def playerAction(monster, monsterDodging):
                                 input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana'] - player['currentWeapon']['manaReduced']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You don\'t have enough mana to cast that spell! ' + used)
+                            didAnAction = False
                     else:
                         if player['mana'] >= player['actions']['magic'][theSpell]['mana']:
                             player['mana'] -= player['actions']['magic'][theSpell]['mana']
@@ -314,11 +325,19 @@ def playerAction(monster, monsterDodging):
                                 input('You casted a ' + player['actions']['magic'][theSpell]['name'] + ' for ' + str(player['actions']['magic'][theSpell]['mana']) + ' and you did ' + str(player['actions']['magic'][theSpell]['value']) + ' damage! ' + used)
                         else:
                             input('You don\'t have enough mana to cast that spell! ' + used)
+                            didAnAction = False
                 except:
                     input('That isn\'t a spell you know! ' + used)
+                    didAnAction = False
             else:
                 input('You do not know any magic! ' + used)
-            break
+                didAnAction = False
+
+            if monster.stats['hp'] <= 0:
+                input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
+                player['xp'] += monster.stats['xpGain']
+                return True
+            
         elif action.lower() == 'dodge':
             if 'dodge' in player['actions']:
                 dodging = True
@@ -326,6 +345,7 @@ def playerAction(monster, monsterDodging):
             else:
                 input('You don\'t have the dodge action!  ' + used )
                 dodgedLastTurn = False
+                didAnAction = False
         elif action.lower() == 'items':
             lookInInventory()
             break
@@ -341,11 +361,12 @@ def playerAction(monster, monsterDodging):
         else:
             input('That is not an option!  ' + used )
             clear()
-        
-        if monster.stats['hp'] <= 0:
-            input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
-            player['xp'] += monster.stats['xpGain']
-            return True
+            didAnAction = False
+    
+        if didAnAction == True:
+            break
+        else:
+            clear()
     
 
 # allows the player to look in their inventory
@@ -462,6 +483,10 @@ def lookInInventory():
                         # ... otherwise ...
                         else:
                             # ... equip the item
+                            try:
+                                player['actions']['atk'].pop(player['currentWeapon']['name'])
+                            except:
+                                pass
                             player['currentWeapon'] = i
                             input('You have armed yourself with a ' + i['name'] + '! ' + used )
                             
@@ -574,7 +599,10 @@ def fight(boss=False):
                 dodgingLastTurn = True
             
         else:
-            playersAction = playerAction(monster, monsterDodging)
+            if boss == True:
+                playersAction = playerAction(monster, monsterDodging, boss=True)
+            else:
+                playersAction = playerAction(monster, monsterDodging)
             
             if playersAction == 'ran':
                 return 'ran'
@@ -743,9 +771,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -814,9 +846,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -885,9 +921,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -956,9 +996,13 @@ def loop():
                     # ...then edit variables and get a new map
                     floor += 1
                     
-                    openMap = open('maps/map' + str(floor) + '.txt', 'r')
-                    map = list(openMap.read())
-                    openMap.close()
+                    try:
+                        openMap = open('maps/map' + str(floor) + '.txt', 'r')
+                        map = list(openMap.read())
+                        openMap.close()
+                    except:
+                        input('You win!!! ' + used)
+                        break
                     
                     shopInventories = {}
                     
@@ -1016,7 +1060,7 @@ def loop():
                     if player['actions']['magic'][str(userInput)]['reqCombat'] == True:
                         input('You can\'t use that spell here! ' + used)
                     elif player['actions']['magic'][str(userInput)]['type'] == 'light':
-                        light += player['actions']['magic'][str(userInput)]['value']
+                        light += player['actions']['magic'][str(userInput)]['value'] + 1
                         
                         if light > 200:
                             light = 200
