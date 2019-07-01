@@ -12,7 +12,7 @@ openMap.close()
 
 # define the player's stats
 player = {'class': None, 'armorBonus': 0, 'xp':0, 'healthGain': 0, 'meleeBonus': 0, 'xpGoal': 20, 'rangedBonus': 0, 'hp': 10, 'mana':0, 'maxMana':0, 'maxHp':10, 'speed':7, 'actionsNum': 1, 'actions':{'atk':{'punch':5}, 'dodge':True, 'magic':{}}, 'level':1, 'gold':0, 'currentArmor':{'name':'unarmored', 'value':0}, 'currentWeapon':{'name':'none', 'value':0, 'type':'fist'}}
-inventory = [items.healingPotion_1, items.torch] # the player's inventory
+inventory = [items.healingPotion_1, items.torch, items.shortBow] # the player's inventory
 used = '(Press enter to continue) ' # this piece of text is used a LOT of times
 floor = 1 # the floor that the player is on
 light = 50 # the amount of light in the room
@@ -58,7 +58,7 @@ def choseClass():
             player['meleeBonus'] = 2
             player['healthgain'] = 5
             player['armorBonus'] = 1
-            player['atk']['punch'] += player['meleeBonus']
+            player['actions']['atk']['punch'] += player['meleeBonus']
             break
         elif userInput.lower() == 'ranger':
             player['class'] = 'ranger'
@@ -232,7 +232,7 @@ def levelUp():
 
 
 # used when player makes an actions in combat
-def playerAction(monster, monsterDodging):
+def playerAction(monster, monsterDodging, boss=False):
     global player
     global sneaking
     global light
@@ -483,6 +483,10 @@ def lookInInventory():
                         # ... otherwise ...
                         else:
                             # ... equip the item
+                            try:
+                                player['actions']['atk'].pop(player['currentWeapon']['name'])
+                            except:
+                                pass
                             player['currentWeapon'] = i
                             input('You have armed yourself with a ' + i['name'] + '! ' + used )
                             
@@ -595,7 +599,10 @@ def fight(boss=False):
                 dodgingLastTurn = True
             
         else:
-            playersAction = playerAction(monster, monsterDodging)
+            if boss == True:
+                playersAction = playerAction(monster, monsterDodging, boss=True)
+            else:
+                playersAction = playerAction(monster, monsterDodging)
             
             if playersAction == 'ran':
                 return 'ran'
