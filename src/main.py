@@ -653,7 +653,7 @@ def fight(boss=False):
                 clear()
                 if monster.stats['speed'] >= player['speed'] or light == 0:
                     i = 0
-                    while i < monster.stats['actionsNum']:  
+                    while i < monster.stats['actionsNum']:
                         runAction = randint(0, actionsNum)
                         currentAction = list(monster.stats['actions'])[runAction]
                         if currentAction == 'atk':
