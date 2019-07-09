@@ -171,16 +171,22 @@ def shop(location):
             break
     shopInventories[str(location)] = shopInventory # store the shop's inventory
 
-# if the player has status conditions
-def statusConditions():
+# used to add functionality to status conditions
+def ():
+    # get globals
     global player
     
+    # if the player is poisoned ...
     if player['status'] == 'poisoned':
+        # ... if a random number generator from 1 to 12 is equals to 1 ...
         if randint(1, 12) != 1:
+            # ... make the player take damage
             dmg = randint(3, 9)
             player['health'] -= dmg
-            player('You took ' + str(dmg) + ' poison damage! ' + used)
+            player('You took ' + str(dmg) + ' poison damage! ' + used) # inform the player they took damage
+        # ... otherwise ...
         else:
+            # ... get rid of the player's status condition
             player('You are no longer poisoned! ' + used)
             player['status'] = None
     
@@ -820,7 +826,7 @@ def loop():
                         map = list(openMap.read())
                         openMap.close()
                     except:
-                        input('You win!!! ' + used)
+                        input('YOU WIN!!! ' + used)
                         break
                     
                     shopInventories = {}
@@ -895,7 +901,7 @@ def loop():
                         map = list(openMap.read())
                         openMap.close()
                     except:
-                        input('You win!!! ' + used)
+                        input('YOU WIN!!! ' + used)
                         break
                     
                     shopInventories = {}
@@ -970,7 +976,7 @@ def loop():
                         map = list(openMap.read())
                         openMap.close()
                     except:
-                        input('You win!!! ' + used)
+                        input('YOU WIN!!! ' + used)
                         break
                     
                     shopInventories = {}
@@ -1045,7 +1051,7 @@ def loop():
                         map = list(openMap.read())
                         openMap.close()
                     except:
-                        input('You win!!! ' + used)
+                        input('YOU WIN!!! ' + used)
                         break
                     
                     shopInventories = {}
