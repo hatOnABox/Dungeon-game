@@ -25,7 +25,7 @@ def clear():
   
     if name == 'nt': 
         system('cls') 
-    else: 
+    else:
         system('clear')
 
 # this function gets ran at the begining of the game. This function allows the player to chose their class
@@ -172,7 +172,7 @@ def shop(location):
     shopInventories[str(location)] = shopInventory # store the shop's inventory
 
 # used to add functionality to status conditions
-def ():
+def statusConditions():
     # get globals
     global player
     
