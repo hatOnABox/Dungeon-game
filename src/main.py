@@ -571,17 +571,26 @@ def fight(boss=False):
     # set variables
     monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp)) # get monster healths
     actionsNum = len(list(monster.stats['actions'])) - 1 # get the number of actions the monster can use
-    attackNum = len(list(monster.stats['actions']['atk'])) - 1 # 
+    attackNum = len(list(monster.stats['actions']['atk'])) - 1 # get the number of attacks the monster can use
     dodgedLastTurn = False
     
+    # if the light levels are not equals to 0 ...
     if light != 0:
+        # ... inform the user what attacks them!
         input('A ' + monster.stats['name'] + ' attacks you!  ' + used )
+    # if the light levels are equals to 0 ...
     else:
+        # ... then inform the user something attacked them but don't say what is attacking them
         input('Something attacks you! ' + used)
 
     while True:
         clear()
+        
+        # if the player's speed is larger than the monster's speed or the light levels are equals to 0 ...
         if monster.stats['speed'] >= player['speed'] or light == 0:
+            # ... then the monster goes first
+            
+            # ... go through the monster's actions and select a random one to use
             i = 0
             while i < monster.stats['actionsNum']:  
                 runAction = randint(0, actionsNum)
@@ -621,39 +630,64 @@ def fight(boss=False):
                     dodging = False
                 i += 1
             
-
+            # ... if the player's health is less then or equals to 0 ...
             if player['hp'] <= 0:
+                # ... inform the player that they died
                 input('YOU DIED!!!  ' + used )
                 return False
             
-            playersAction = playerAction(monster, monsterDodging)
-            
-            if playersAction == 'ran':
-                return 'ran'
-            elif playersAction == True:
-                return True
-            elif playersAction == False:
-                return False
-            elif playersAction == 'dodging':
-                dodging = True
-                dodgingLastTurn = True
-            
-        else:
+            # get the player's action
             if boss == True:
                 playersAction = playerAction(monster, monsterDodging, boss=True)
             else:
                 playersAction = playerAction(monster, monsterDodging)
             
+            # ... if the player ran ...
             if playersAction == 'ran':
+                # ... return 'ran' so that loop() can execute special code
                 return 'ran'
+            # ... if the player won the fight ...
             elif playersAction == True:
+                # ... return True so that loop() can execute special code
                 return True
+            # ... if the player losed the fight ...
             elif playersAction == False:
+                # ... return False so that loop() can execute special code
                 return False
+            # ... if the player used the dodge action (and they can use the dodge action) ...
             elif playersAction == 'dodging':
+                # ... tell the program that the player is dodging and that they can't dodge on their next turn
+                dodging = True
+                dodgingLastTurn = True
+        # otherwise ...    
+        else:
+            # ... the player goes first
+            
+            # get the player's action
+            if boss == True:
+                playersAction = playerAction(monster, monsterDodging, boss=True)
+            else:
+                playersAction = playerAction(monster, monsterDodging)
+            
+            # ... if the player ran ...
+            if playersAction == 'ran':
+                # ... return 'ran' so that loop() can execute special code
+                return 'ran'
+            # ... if the player won the fight ...
+            elif playersAction == True:
+                # ... return True so that loop() can execute special code
+                return True
+            # ... if the player losed the fight ...
+            elif playersAction == False:
+                # ... return False so that loop() can execute special code
+                return False
+            # ... if the player used the dodge action (and they can use the dodge action) ...
+            elif playersAction == 'dodging':
+                # ... tell the program that the player is dodging and that they can't dodge on their next turn
                 dodging = True
                 dodgingLastTurn = True
 
+            # ... go through the monster's actions and select a random one to use
             i = 0
             while i < monster.stats['actionsNum']:  
                 runAction = randint(0, actionsNum)
@@ -693,7 +727,9 @@ def fight(boss=False):
                     dodging = False
                 i += 1
             
+            # ... if the player's health is less then or equals to 0 ...
             if player['hp'] <= 0:
+                # ... inform the player that they died
                 input('YOU DIED!!!  ' + used )
                 return False
         
