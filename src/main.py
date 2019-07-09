@@ -190,8 +190,9 @@ def statusConditions():
             player('You are no longer poisoned! ' + used)
             player['status'] = None
     
-            
+    # if the player's hp is less then or equals to 0 ...    
     if player['hp'] <= 0:
+        # ... then kill the player
         input('YOU DIED!!!  ' + used )
         return False
 
