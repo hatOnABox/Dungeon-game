@@ -1078,8 +1078,8 @@ def loop():
                         # ... then move the player to the space they wanted to move to
                         map[beforeInput+map.index('\n')+1] = '@'
                         map[beforeInput] = ' '
-        # if the user input equals to 'exit' then exit the game
-        elif userInput.lower() == 'exit':
+        # if the user input equals to 'exit' or 'quit' then exit the game
+        elif userInput.lower() == 'exit' or userInput.lower() == 'quit':
             break
         # if the user input equals 'items' then look through the player's items
         elif userInput.lower() == 'items':
