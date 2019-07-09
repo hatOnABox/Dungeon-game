@@ -415,7 +415,7 @@ def lookInInventory():
             print(i['name'])
         
         # ask the user what item would they like to use
-        itemName = input('Type in an item\'s items name to use it or type in "cancel"  ' + used)
+        itemName = input('Type in an item\'s items name to use it or type in "cancel" ')
         
         # if the user input is not equals to 'cancel' ...
         if itemName.lower() != 'cancel':
@@ -550,28 +550,34 @@ def lookInInventory():
 
 # when the player gets in a fight
 def fight(boss=False):
+    # globals
     global player
     global sneaking
     global light
     
+    dodging = False # if the player is dodging
+    monsterDodging = False # if the monster is dodging
     
-    dodging = False
-    monsterDodging = False
+    # if the monster is a boss ...
     if boss == True:
+        # ... get the floor's bosses
         boss = True
         monster=choice(monsters.listOfBosses[str(floor)])
+    # otherwise ...
     else:
+        # ... get a monster from the current floor
         monster = choice(monsters.listOfMonsters[str(floor)])
     
-    monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp))
-    actionsNum = len(list(monster.stats['actions'])) - 1
-    attackNum = len(list(monster.stats['actions']['atk'])) - 1
+    # set variables
+    monster.stats['hp'] = randint(monster.baseHp, 2 * (floor + monster.baseHp)) # get monster healths
+    actionsNum = len(list(monster.stats['actions'])) - 1 # get the number of actions the monster can use
+    attackNum = len(list(monster.stats['actions']['atk'])) - 1 # 
     dodgedLastTurn = False
     
     if light != 0:
         input('A ' + monster.stats['name'] + ' attacks you!  ' + used )
     else:
-        input('Something attacks you! ' + used )
+        input('Something attacks you! ' + used)
 
     while True:
         clear()
@@ -649,47 +655,43 @@ def fight(boss=False):
                 dodgingLastTurn = True
 
             i = 0
-            while True:
-                clear()
-                if monster.stats['speed'] >= player['speed'] or light == 0:
-                    i = 0
-                    while i < monster.stats['actionsNum']:
-                        runAction = randint(0, actionsNum)
-                        currentAction = list(monster.stats['actions'])[runAction]
-                        if currentAction == 'atk':
-                            if dodging == True or sneaking == True:
-                                if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False and sneaking == False:
-                                    input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
-                                    dodgedLastTurn = True
-                                    runAttack = randint(1, attackNum)
-                                    currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                                    monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
-                                    input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
-                                elif dodgedLastTurn == True:
-                                    input('You already dodged last turn! (Press enter to contimue) ')
-                                    dodgedLastTurn = False
-                                    runAttack = randint(1, attackNum)
-                                    currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                                    player['hp'] -= monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']
-                                    input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']) + ' damage!  ' + used )
-                                else:   
-                                    input('You dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
-                                    dodgedLastTurn = True
-                                dodging = False
-                            else:
-                                runAttack = randint(1, attackNum)
-                                currentAttack = list(monster.stats['actions']['atk'])[runAttack]
-                                player['hp'] -= monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']
-                                input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']) + ' damage!  ' + used )
-                                
-                                if monster.stats['actions']['atk'][currentAttack]['status'] != None:
-                                    if random.randint(1, 2) == 1:
-                                        player['status'] = monster.stats['actions']['atk'][currentAttack]['status']
-                                        print('You have been ' + player['status'] + '!' + used)
-                        elif currentAction == 'dodge':
-                            monsterDodging = True
-                            dodging = False
-                        i += 1
+            while i < monster.stats['actionsNum']:  
+                runAction = randint(0, actionsNum)
+                currentAction = list(monster.stats['actions'])[runAction]
+                if currentAction == 'atk':
+                    if dodging == True or sneaking == True:
+                        if dodging == True and monster.stats['speed'] > player['speed'] and dodgedLastTurn == False and sneaking == False:
+                            input('You\'re to slow to dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
+                            dodgedLastTurn = True
+                            runAttack = randint(1, attackNum)
+                            currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                            monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]-player['currentArmor']['value']) + ' damage!  ' + used )
+                        elif dodgedLastTurn == True:
+                            input('You already dodged last turn! (Press enter to contimue) ')
+                            dodgedLastTurn = False
+                            runAttack = randint(1, attackNum)
+                            currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                            player['hp'] -= monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']
+                            input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']) + ' damage!  ' + used )
+                        else:   
+                            input('You dodge the ' + monster.stats['name'] + '\'s attack!  ' + used )
+                            dodgedLastTurn = True
+                        dodging = False
+                    else:
+                        runAttack = randint(1, attackNum)
+                        currentAttack = list(monster.stats['actions']['atk'])[runAttack]
+                        player['hp'] -= monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']
+                        input('The ' + monster.stats['name'] + ' makes a ' + currentAttack + ' attack and hits you for ' + str(monster.stats['actions']['atk'][currentAttack]['dmg']-player['currentArmor']['value']) + ' damage!  ' + used )
+                        
+                        if monster.stats['actions']['atk'][currentAttack]['status'] != None:
+                            if random.randint(1, 2) == 1:
+                                player['status'] = monster.stats['actions']['atk'][currentAttack]['status']
+                                print('You have been ' + player['status'] + '!' + used)
+                elif currentAction == 'dodge':
+                    monsterDodging = True
+                    dodging = False
+                i += 1
             
             if player['hp'] <= 0:
                 input('YOU DIED!!!  ' + used )
@@ -697,6 +699,7 @@ def fight(boss=False):
         
 # the main game loop
 def loop():
+    # globals
     global map
     global light
     global sneaking
