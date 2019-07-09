@@ -257,29 +257,35 @@ def levelUp():
 
 # used when player makes an actions in combat
 def playerAction(monster, monsterDodging, boss=False):
+    # get global vars
     global player
     global sneaking
     global light
     
     while True:
-        print('hp: ' + str(player['hp']) + '/' + str(player['maxHp']))
+        print('hp: ' + str(player['hp']) + '/' + str(player['maxHp'])) # print the player's hp
         
+        # if the player is a mage ...
         if player['class'] == 'mage':
-            print('mana: ' + str(player['mana']) + '/' + str(player['maxMana']))
+            print('mana: ' + str(player['mana']) + '/' + str(player['maxMana'])) # ... then print the player's mana
         
+        # run statusConditions() and if the player's current status condition kills them ...
+        if statusConditions() == False:
+            return False # ... return False so that fight() can process that the player is dead
         
-        if statusConditions == False:
-            return False
+        action = input('What are you going to do? (Type in "help" for a list of actions) ') # get the player's input 
         
-        action = input('What are you going to do? (Type in "help" for a list of actions) ')
+        didAnAction = True # to ensure that the player's does something and if their input is invalid they can still do a valid action
         
-        didAnAction = True
-        
+        # if the player's input is equals to 'help' ...
         if action.lower() == 'help':
+            # ... print a list of actions that the player can do
             print('''Atk - shows the player a list of their attacks. The player can then type the name of the attack they want to do.\nMagic - allows the player to cast magic (only works if the player is a wizard)\nDodge - allows the player to dodge the monsters next attack\nRun - allows the player to attempt to run away from the monster\nItems - allows the player to look through their inventory and use items''')
             input('(Press enter to continue)')
             clear()
+        # if the player's input is equals to 'atk' ...
         elif action.lower() == 'atk':
+            # ... run code so that the player can do damage to the monster
             if monsterDodging != True or monster.stats['speed'] > player['speed']:
                 for i in list(player['actions']['atk']):
                     print(i)
@@ -314,8 +320,9 @@ def playerAction(monster, monsterDodging, boss=False):
                 input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
                 player['xp'] += monster.stats['xpGain']
                 return True
-            
+        # if player's action is equals 'magic' ...
         elif action.lower() == 'magic':
+            # ... run code so that the player can cast a spell
             if player['class'] == 'mage':
                 for i in player['actions']['magic']:
                     print(i)
@@ -364,35 +371,52 @@ def playerAction(monster, monsterDodging, boss=False):
                 input('You have defeated the ' + monster.stats['name'] + '!  ' + used )
                 player['xp'] += monster.stats['xpGain']
                 return True
-            
+        # if the player's action is equals to dodge ...
         elif action.lower() == 'dodge':
+            # ... if the player has the dodge action ...
             if 'dodge' in player['actions']:
-                dodging = True
+                # ... make the player dodge
                 return 'dodging'
+            # ... otherwise ...
             else:
+                # ... inform the player that they don't have the dodge action
                 input('You don\'t have the dodge action!  ' + used )
-                dodgedLastTurn = False
                 didAnAction = False
+        # if the player's action is equals to 'items' ...
         elif action.lower() == 'items':
+            # ... look in the player's inventory
             lookInInventory()
             break
+        # if the player's actions is equals to run ...
         elif action.lower() == 'run':
+            # ... if the player's speed is greater ...
             if player['speed'] > monster.stats['speed']:
+                # ... make the player run away
                 input('You run away!  ' + used )
                 return 'ran'
+            # ... if the monster is a boss ...
             elif boss == True:
+                # ... inform the player that they can't run from a boss
                 input('You can\'t run away from a boss!  ' + used )
+            # ... otherwise ...
             else:
-                input('You\'re to slow to run away!  ' + used )
+                # ... infrom the player that they are too slow to run away
+                input('You\'re to slow to run away!  ' + used)
             break
+        # otherwise (the player enters invalid input) ...
         else:
+            # inform the player that their input is invalid and allow them to retake their turn
             input('That is not an option!  ' + used )
             clear()
             didAnAction = False
     
+        # if the player's input is valid ...
         if didAnAction == True:
+            # ... end the player's turn
             break
+        # otherwise ...
         else:
+            # ... clear the screent and allow the player to retake their turn
             clear()
     
 
