@@ -1141,10 +1141,8 @@ def loop():
             if userInput.lower() != 'items' and userInput.lower() != 'help':
                 light -= 1
         
-        
         if userInput.lower() != 'sneak':
             sneaking = False
-        
         
         # if the user's health is lower than zero...
         if player['hp'] <= 0:
